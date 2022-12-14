@@ -142,8 +142,14 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
             automata->state = in_string;
             break;
         case 'A'...'Z':
-            if (c == 'C' || c == 'E' || c == 'G' || c == 'I' || c == 'L' || c == 'N' || c == 'P' || c == 'S' '|| c == W') {
-                
+            if (c == 'C') {
+                automata->state = C;
+            }  else if (c == 'E') {
+                automata->state = E;
+            } else if (c == 'G') {
+                automata->state = G;
+            } || c == 'I' || c == 'L' || c == 'N' || c == 'P' || c == 'S' '|| c == W') {
+                automata->state = 
             } else {
                 automata->token = (Token*)allocate_space(1, sizeof(Token));
                 automata->token->type = variable;
