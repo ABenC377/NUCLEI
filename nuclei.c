@@ -32,12 +32,11 @@ Token_list* get_tokens_from_file(FILE* fp) {
 void update_tokens(Token_list* tokens, Automata* automata, char c) {
     switch (automata->state) {
         case start:
-            handle_start_state(token, automata, c);
+            handle_start_state(tokens, automata, c);
             break;
         case in_literal:
-            handle_in_literal_state(token, automata, c);
-            break;
         case in_variable:
+            handle_in_state(tokens, automata, c);
             break;
         case N:
             break;
@@ -176,9 +175,13 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
     }
 }
 
-void handle_in_literal_state(Token_list* tokens, Automata* automata, char c) {
-    if (c == SINGLEQUOTE) {
+void handle_in_state(Token_list* tokens, Automata* automata, char c) {
+    if ((automata->state == in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
+        automata->state = start;
+    } else if ((automata->state == in_string) && (c == '"')) {
+        add_token(tokens, automata->token);
+        automata->state = start;
     } else {
         int index = 0;
         while ((++index < LEXEMEMAXLEN) && (automata->token->lexeme[index] != '\0')) {}
@@ -188,6 +191,7 @@ void handle_in_literal_state(Token_list* tokens, Automata* automata, char c) {
         automata->token->lexeme[index] = c;
     }
 }
+
 
 void add_token(Token_list* tokens, Token* token) {
     Token_node* new_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
