@@ -26,7 +26,7 @@ The formal grammar of NUCLEI is as follows:
 
 *SET ::= "SET" VAR LIST*
 
-*PRINT ::= "PRINT" VAR | "PRINT" STRING*
+*PRINT ::= "PRINT" LIST | "PRINT" STRING*
 
 *IF ::= "IF" "(" BOOLFUNC ")" "(" INSTRCTS "(" INSTRCTS*
 

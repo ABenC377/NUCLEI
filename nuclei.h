@@ -21,7 +21,8 @@ typedef enum {
     CDR,
     CAR,
     l_parenthesis, 
-    r_parenthesis
+    r_parenthesis,
+    INVALID
 } token_type;
 
 typedef enum {
@@ -47,8 +48,7 @@ typedef struct Cons {
 
 typedef struct {
     token_type type;
-    char* string_lexeme;
-    char* literal_lexeme;
+    char* lexeme;
     char var_name;
 } Token;
 

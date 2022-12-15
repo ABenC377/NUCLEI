@@ -35,6 +35,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             handle_start_state(token, automata, c);
             break;
         case in_literal:
+            handle_in_literal_state(token, automata, c);
             break;
         case in_variable:
             break;
@@ -132,13 +133,13 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
         case SINGLEQUOTE:
             automata->token = (Token*)allocate_space(1, sizeof(Token));
             automata->token->type = literal;
-            automata->token->literal_lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
+            automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
             automata->state = in_literal;
             break;
         case '"':
             automata->token = (Token*)allocate_space(1, sizeof(Token));
             automata->token->type = string;
-            automata->token->string_lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
+            automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
             automata->state = in_string;
             break;
         case 'A'...'Z':
@@ -148,8 +149,18 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
                 automata->state = E;
             } else if (c == 'G') {
                 automata->state = G;
-            } || c == 'I' || c == 'L' || c == 'N' || c == 'P' || c == 'S' '|| c == W') {
-                automata->state = 
+            } else if (c == 'I') {
+                automata->state = I;
+            } else if (c == 'L') {
+                automata->state = L;
+            } else if (c == 'N') {
+                automata->state = N;
+            } else if (c == 'P') {
+                automata->state = P;
+            } else if (c == 'S') {
+                automata->state = S;
+            } else if (c == 'W') {
+                automata->state = W;
             } else {
                 automata->token = (Token*)allocate_space(1, sizeof(Token));
                 automata->token->type = variable;
@@ -158,7 +169,33 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
             }
             break;
         default:
+            automata->token = (Token*)allocate_space(1, sizeof(Token));
+            automata->token->type = INVALID;
+            add_token(tokens, automata->token);
             break;
+    }
+}
+
+void handle_in_literal_state(Token_list* tokens, Automata* automata, char c) {
+    if (c == SINGLEQUOTE) {
+        add_token(tokens, automata->token);
+    } else {
+        int index = 0;
+        while ((++index < LEXEMEMAXLEN) && (automata->token->lexeme[index] != '\0')) {}
+        if (index == LEXEMEMAXLEN) {
+            throw_error("ERROR: literal lexeme greater than maximum allowed string length\n")
+        }
+        automata->token->lexeme[index] = c;
+    }
+}
+
+void add_token(Token_list* tokens, Token* token) {
+    Token_node* new_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
+    new_token_node->value = token;
+    if (!(tokens->start)) {
+        tokens->start = tokens->end = new_token_node;
+    } else {
+        tokens->end = tokens->end->next = new_token_node;
     }
 }
 
