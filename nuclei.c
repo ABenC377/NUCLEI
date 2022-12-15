@@ -1,11 +1,24 @@
 int main(int argc, char* argv[]) {
     
     // Set up the file to be scanned
+    char* file_name = get_file_name(argc, argv);
     
     Token_list* list = run_lexical_analyser(file_name);
+    print_tokens(list);
     
+    free_token_list(list);
 }
 
+char* get_file_name(int argc, char* argv[]) {
+    check_inputs(argc, argv);
+    return argv[1];
+}
+
+void check_inputs(int argc, char* argv[]) {
+    if (argc != 2) {
+        throw_error("ERROR: invalid number of command line arguments\n");
+    }
+}
 
 Token_list* run_lexical_analyser(char* file_name) {
     FILE* fp = fopen(file_name, "r");
@@ -579,4 +592,17 @@ void* allocate_space(int num, int size) {
 void throw_error(const char* error_message) {
     fputs(error_message, stderr);
     exit(EXIT_FAILURE);
+}
+
+void free_token_list(Token_list* list) {
+    Token_node* current = list->start;
+    while (current) {
+        if (current->value) {
+            if (current->value->lexeme) {
+                free(current->value->lexeme);
+            }
+            free(current->value);
+        }
+    }
+    free(list);
 }
