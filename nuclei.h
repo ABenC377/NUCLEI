@@ -67,3 +67,19 @@ typedef struct {
     Token* token;
 } Automata;
 
+
+char* get_file_name(int argc, char* argv[]);
+void check_inputs(int argc, char* argv[]);
+Token_list* run_lexical_analyser(char* file_name);
+Token_list* get_tokens_from_file(FILE* fp);
+void update_tokens(Token_list* tokens, Automata* automata, char c);
+void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type);
+void handle_start_state(Token_list* tokens, Automata* automata, char c);
+void add_variable_token(Token_list* tokens, Automata* automata, char name);
+void handle_in_state(Token_list* tokens, Automata* automata, char c);
+void print_tokens(Token_list* tokens);
+void print_token(Token_node node);
+void add_token(Token_list* tokens, Token* token);
+void* allocate_space(int num, int size);
+void throw_error(const char* error_message);
+void free_token_list(Token_list* list);
