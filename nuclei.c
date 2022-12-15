@@ -42,8 +42,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'I') {
                 automata->state = NI;
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'N') // Make sure this doesn't lead to an infinite loop
+                add_variable_token(tokens, automata, 'N');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -51,8 +50,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'L') {
                 make_and_add_simple_token(token, automata, t_nil);
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'N');
+                add_variable_token(tokens, automata, 'N');
                 update_tokens(tokens, automata, 'I');
                 update_tokens(tokens, automata, c);
             }
@@ -61,8 +59,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'H') {
                 automata->state = WH;
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'W');
+                add_variable_token(tokens, automata, 'W');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -70,8 +67,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'I') {
                 automata->state = WHI;
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'W');
+                add_variable_token(tokens, automata, 'W');
                 update_tokens(tokens, automata, 'H');
                 update_tokens(tokens, automata, c);
             }
@@ -80,8 +76,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'L') {
                 automata->state = WHIL;
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'W');
+                add_variable_token(tokens, automata, 'W');
                 update_tokens(tokens, automata, 'H');
                 update_tokens(tokens, automata, 'I');
                 update_tokens(tokens, automata, c);
@@ -91,8 +86,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'E') {
                 make_and_add_simple_token(tokens, automata, t_while);
             } else {
-                automata->state = start;
-                update_tokens(tokens, automata, 'W');
+                add_variable_token(tokens, automata, 'W');
                 update_tokens(tokens, automata, 'H');
                 update_tokens(tokens, automata, 'I');
                 update_tokens(tokens, automata, 'L');
@@ -103,8 +97,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'I') {
                 make_and_add_simple_token(tokens, automata, t_if);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'I');
+                add_variable_token(tokens, automata, 'I');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -114,8 +107,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'L') {
                 automata->state = PL;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -123,8 +115,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'I') {
                 autoamta->sate = PRI;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 udpate_tokens(tokens, automata, 'R');
                 update_tokens(tokens, automata, c);
             }
@@ -133,8 +124,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'N') {
                 automata->state = PRIN;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'I');
                 update_tokens(tokens, automata, c);
@@ -144,8 +134,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'T') {
                 make_and_add_simple_token(tokens, automata, t_print);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'I');
                 udpate_tokens(tokens, automata, 'N');
@@ -156,8 +145,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'U') {
                 automata->state = PLU;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 udpate_tokens(tokens, automata, 'L');
                 update_tokens(tokens, automata, c);
             }
@@ -166,8 +154,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_plus);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'P');
+                add_variable_token(tokens, automata, 'P');
                 udpate_tokens(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'U');
                 update_tokens(tokens, automata, c);
@@ -177,8 +164,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'E') {
                 automata->state = SE;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'S');
+                add_variable_token(tokens, automata, 'S');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -186,8 +172,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'T') {
                 make_and_add_simple_token(tokens, automata, t_set);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'S');
+                add_variable_token(tokens, automata, 'S');
                 udpate_tokens(tokens, automata, 'E');
                 update_tokens(tokens, automata, c);
             }
@@ -196,8 +181,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'E') {
                 automata->state = LE;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -207,8 +191,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'N') {
                 automata->state = LEN;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'E');
                 update_tokens(tokens, automata, c);
             }
@@ -217,8 +200,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_less);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'S');
                 update_tokens(tokens, automata, c);
@@ -228,8 +210,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'G') {
                 automata->state = LENG;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'N');
                 update_tokens(tokens, automata, c);
@@ -239,8 +220,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'T') {
                 automata->state = LENGT;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'N');
                 udpate_tokens(tokens, automata, 'G');
@@ -251,8 +231,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'H') {
                 make_and_add_simple_token(tokens, automata, t_length);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'L');
+                add_variable_token(tokens, automata, 'L');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'N');
                 udpate_tokens(tokens, automata, 'G');
@@ -264,8 +243,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'R') {
                 automata->state = GR;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -273,8 +251,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'E') {
                 automata->state = GRE;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 udpate_tokens(tokens, automata, 'R');
                 update_tokens(tokens, automata, c);
             }
@@ -283,8 +260,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'A') {
                 automata->state = GREA;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'E');
                 update_tokens(tokens, automata, c);
@@ -294,8 +270,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'T') {
                 automata->state = GREAT;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'A');
@@ -306,8 +281,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'E') {
                 automata->state = GREATE;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'A');
@@ -319,8 +293,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_greater)
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'G');
+                add_variable_token(tokens, automata, 'G');
                 udpate_tokens(tokens, automata, 'R');
                 udpate_tokens(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'A');
@@ -333,8 +306,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'Q') {
                 automata->state = EQ;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'E');
+                add_variable_token(tokens, automata, 'E');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -342,8 +314,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'U') {
                 automata->state = EQU;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'E');
+                add_variable_token(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'Q');
                 update_tokens(tokens, automata, c);
             }
@@ -352,8 +323,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'A') {
                 automata->state = EQUA;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'E');
+                add_variable_token(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'Q');
                 udpate_tokens(tokens, automata, 'U');
                 update_tokens(tokens, automata, c);
@@ -363,8 +333,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'L') {
                 make_and_add_simple_token(tokens, automata, t_equal);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'E');
+                add_variable_token(tokens, automata, 'E');
                 udpate_tokens(tokens, automata, 'Q');
                 udpate_tokens(tokens, automata, 'U');
                 udpate_tokens(tokens, automata, 'A');
@@ -379,8 +348,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'O') {
                 automata->state = CO;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'C');
+                add_variable_token(tokens, automata, 'C');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -388,8 +356,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_CAR);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'C');
+                add_variable_token(tokens, automata, 'C');
                 udpate_tokens(tokens, automata, 'A');
                 update_tokens(tokens, automata, c);
             }
@@ -398,8 +365,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_CDR);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'C');
+                add_variable_token(tokens, automata, 'C');
                 udpate_tokens(tokens, automata, 'D');
                 update_tokens(tokens, automata, c);
             }
@@ -408,8 +374,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'N') {
                 automata->state = CON;
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'C');
+                add_variable_token(tokens, automata, 'C');
                 udpate_tokens(tokens, automata, 'O');
                 update_tokens(tokens, automata, c);
             }
@@ -418,8 +383,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'N') {
                 make_and_add_simple_token(tokens, automata, t_CONS);
             } else {
-                automata->state = start;
-                udpate_tokens(tokens, automata, 'C');
+                add_variable_token(tokens, automata, 'C');
                 udpate_tokens(tokens, automata, 'O');
                 update_tokens(tokens, automata, c);
             }
@@ -489,10 +453,7 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'W') {
                 automata->state = W;
             } else {
-                automata->token = (Token*)allocate_space(1, sizeof(Token));
-                automata->token->type = t_variable;
-                automata->token->var_name = c;
-                add_token(tokens, automata->token);
+                add_variable_token(tokens, automata, c);
             }
             break;
         default:
@@ -501,6 +462,14 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
             add_token(tokens, automata->token);
             break;
     }
+}
+
+void add_variable_token(Token_list* tokens, Automata* automata, char name) {
+    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    automata->token->type = t_variable;
+    automata->token->var_name = name;
+    add_token(tokens, automata->token);
+    automata->state = start;
 }
 
 void handle_in_state(Token_list* tokens, Automata* automata, char c) {
