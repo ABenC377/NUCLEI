@@ -4,25 +4,25 @@
 #define LEXEMEMAXLEN 100000
 
 typedef enum {
-    literal, 
-    string, 
-    variable, 
-    nil, 
-    while, 
-    if, 
-    print, 
-    set,
-    equal,
-    greater,
-    less,
-    length,
-    plus,
-    CONS,
-    CDR,
-    CAR,
-    l_parenthesis, 
-    r_parenthesis,
-    INVALID
+    t_literal, 
+    t_string, 
+    t_variable, 
+    t_nil, 
+    t_while, 
+    t_if, 
+    t_print, 
+    t_set,
+    t_equal,
+    t_greater,
+    t_less,
+    t_length,
+    t_plus,
+    t_CONS,
+    t_CDR,
+    t_CAR,
+    t_l_parenthesis, 
+    t_r_parenthesis,
+    t_invalid
 } token_type;
 
 typedef enum {
