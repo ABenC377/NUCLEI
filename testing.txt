@@ -7,7 +7,7 @@ The following functions are assert tested in the lexical_parse_test() function a
     This function takes in the pre-made token-list, FSM automata, and a character.  The behavious is dictated by the state of the automata, and c.  Therefore, I test it with an automata in every state, and for each state, each type of character (e.g., each type of expected character, and imaginable unexpected characters).
 
 - add_previous_chars()
-    
+    This function is for backtracking when you have already recieved a number of letters of a reserved word (e.g., WHILE) and then recieved an unexpected character.  It does this by adding the first letter of the reserved word as a variable token to the token list, and the considering the following letters in order as if they were newly input characters.  To test this function, I checked that the function correctly adds the variable to a token list, and then seperately that it correctly adds the following characters (either as variables or as different reserved words).
 
 - make_and_add_simple_token()
     
