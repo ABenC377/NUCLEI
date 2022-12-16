@@ -39,7 +39,6 @@ Token_list* get_tokens_from_file(FILE* fp) {
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
     char c = (char)fgetc(fp);
     while (c != EOF) {
-        printf("Reading character '%c' (%i)\n", c, c); // debugging
         update_tokens(tokens, automata, c);
         c = (char)fgetc(fp);
     }
@@ -601,16 +600,13 @@ void throw_error(const char* error_message) {
 }
 
 void free_token_list(Token_list* list) {
-    Token_node* current = list->start;
-    while (current) {
-        if (current->value) {
-            if (current->value->lexeme) {
-                free(current->value->lexeme);
-                current->value->lexeme = NULL;
-            }
-            free(current->value);
-            current->value = NULL;
-        }
+    free_token_node(list->start);
+}
+
+void free_token_node(Token_node* node) {
+    if (node->next) {
+        free_token_node(node->next);
+        node->next = NULL;
     }
-    free(list);
+    free(node);
 }

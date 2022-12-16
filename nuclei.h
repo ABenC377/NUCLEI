@@ -90,3 +90,4 @@ void add_token(Token_list* tokens, Token* token);
 void* allocate_space(int num, int size);
 void throw_error(const char* error_message);
 void free_token_list(Token_list* list);
+void free_token_node(Token_node* node);
