@@ -397,11 +397,12 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             }
             break;
         case CON:
-            if (c == 'N') {
+            if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_CONS);
             } else {
                 add_variable_token(tokens, automata, 'C');
                 update_tokens(tokens, automata, 'O');
+                update_tokens(tokens, automata, 'N');
                 update_tokens(tokens, automata, c);
             }
             break;
@@ -505,13 +506,16 @@ void handle_in_state(Token_list* tokens, Automata* automata, char c) {
 }
 
 void print_tokens(Token_list* tokens) {
+    if (!(tokens) || !(tokens->start)) {
+        printf("Empty list - cannot print\n");
+    }
     Token_node* current = tokens->start;
     while (current) {
         print_token(current);
         printf(" -> ");
         current = current->next;
     }
-    printf("\n");
+    printf("END\n");
 }
 
 void print_token(Token_node* node) {
