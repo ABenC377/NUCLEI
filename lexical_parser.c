@@ -515,15 +515,12 @@ void free_token_node(Token_node* node) {
 
 void lexical_parse_test(void) {
     
-    // Token_list* get_tokens_from_file(FILE* fp);
     // void update_tokens(Token_list* tokens, Automata* automata, char c);
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);
     // void make_and_add_simple_token(Token_list* tokens, Automata* automata, // token_type type);
     // void handle_start_state(Token_list* tokens, Automata* automata, char c);
     // void add_variable_token(Token_list* tokens, Automata* automata, char name);
     // void handle_in_state(Token_list* tokens, Automata* automata, char c);
-    // void print_tokens(Token_list* tokens);
-    // void print_token(Token_node* node);
     // void add_token(Token_list* tokens, Token* token);
     
 }

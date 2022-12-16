@@ -2,7 +2,24 @@
 
 ___Lexical parser testing___
 
+The following functions are assert tested in the lexical_parse_test() function as described:
+- update_tokens()
+    This function takes in the pre-made token-list, FSM automata, and a character.  The behavious is dictated by the state of the automata, and c.  Therefore, I test it with an automata in every state, and for each state, each type of character (e.g., each type of expected character, and imaginable unexpected characters).
 
+- add_previous_chars()
+    
+
+- make_and_add_simple_token()
+    
+
+- add_variable_token()
+    
+
+- handle_start_state()
+    
+
+- add_token()
+    
 
 
 The following functions rely on command line arguments and reading from files, and so are not testable with quiet assert testing:
