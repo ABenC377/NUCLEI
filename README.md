@@ -1,4 +1,6 @@
 # NUCLEI-interpreter
+
+## Project parameters
 An interpreter and parser for a programming language called 'NUCLEI'
 
 NUCLEI is a new prgramming language that is inspired by LISP, though has a more limited set of intructions.
@@ -42,3 +44,10 @@ The formal grammar of NUCLEI is as follows:
 
   
 NUCLEI ignores white space.
+
+## Summary of approach
+
+The parser/interpretter runs by doing a first lexical analysis-parse of the file to turn it into a linked list of tokens.  The code for doing this is int the 'lexical_parser.c' and 'lexical_parser.h' files.  From this list of tokens, the parser/interpretter is run.
+
+
+
