@@ -21,3 +21,8 @@ void throw_error(const char* error_message) {
     fputs(error_message, stderr);
     exit(EXIT_FAILURE);
 }
+
+void test(void) {
+    lexical_parse_test();
+    
+}

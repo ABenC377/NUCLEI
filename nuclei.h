@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 void* allocate_space(int num, int size);
 void throw_error(const char* error_message);
