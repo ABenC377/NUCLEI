@@ -2,3 +2,19 @@
 
 ___Lexical parser testing___
 
+
+
+
+The following functions rely on command line arguments and reading from files, and so are not testable with quiet assert testing:
+- run_lexiacl_analyser()
+- get_file_name()
+- check_inputs()
+- get_tokens_from_file()
+
+The following functions are structure-specific print functions, and are only used for debugging etc., so are not testable with quiet assert testing:
+- print_tokens()
+- print_token()
+
+The following functions are used in the lexical_parse_test() function, but are not directly assert tested.  However, they free the memory allocated to the structures made for testing the other functions, and using Valgrind it is seen that running lexical_parse_test() does not result in any memory leaks.  Therefore, we can see that these functions work as intended:
+- free_token_list()
+- free_token_node()

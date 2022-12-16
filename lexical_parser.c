@@ -514,9 +514,7 @@ void free_token_node(Token_node* node) {
 }
 
 void lexical_parse_test(void) {
-    // Token_list* run_lexical_analyser(int argc, char* argv[]);
-    // char* get_file_name(int argc, char* argv[]);
-    // void check_inputs(int argc, char* argv[]);
+    
     // Token_list* get_tokens_from_file(FILE* fp);
     // void update_tokens(Token_list* tokens, Automata* automata, char c);
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);
@@ -527,6 +525,5 @@ void lexical_parse_test(void) {
     // void print_tokens(Token_list* tokens);
     // void print_token(Token_node* node);
     // void add_token(Token_list* tokens, Token* token);
-    // void free_token_list(Token_list* list);
-    // void free_token_node(Token_node* node);
+    
 }
