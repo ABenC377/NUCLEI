@@ -48,49 +48,49 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             if (c == 'I') {
                 automata->state = NI;
             } else {
-                add_previous_chars(1, tokens, automata, 'N', c);
+                add_previous_chars(tokens, automata, 'N', 1, c);
             }
             break;
         case NI:
             if (c == 'L') {
                 make_and_add_simple_token(tokens, automata, t_nil);
             } else {
-                add_previous_chars(2, tokens, automata, 'N', 'I', c);
+                add_previous_chars(tokens, automata, 'N', 2, 'I', c);
             }
             break;
         case W:
             if (c == 'H') {
                 automata->state = WH;
             } else {
-                add_previous_chars(1, tokens, automata, 'W', c);
+                add_previous_chars(tokens, automata, 'W', 1, c);
             }
             break;
         case WH:
             if (c == 'I') {
                 automata->state = WHI;
             } else {
-                add_previous_chars(2, tokens, automata, 'W', 'H', c);
+                add_previous_chars(tokens, automata, 'W', 2, 'H', c);
             }
             break;
         case WHI:
             if (c == 'L') {
                 automata->state = WHIL;
             } else {
-                add_previous_chars(3, tokens, automata, 'W', 'H', 'I', c);
+                add_previous_chars(tokens, automata, 'W', 3, 'H', 'I', c);
             }
             break;
         case WHIL:
             if (c == 'E') {
                 make_and_add_simple_token(tokens, automata, t_while);
             } else {
-                add_previous_chars(4, tokens, automata, 'W', 'H', 'I', 'L', c);
+                add_previous_chars(tokens, automata, 'W', 4, 'H', 'I', 'L', c);
             }
             break;
         case I:
             if (c == 'I') {
                 make_and_add_simple_token(tokens, automata, t_if);
             } else {
-                add_previous_chars(1, tokens, automata, 'I', c);
+                add_previous_chars(tokens, automata, 'I', 1, c);
             }
             break;
         case P:
@@ -99,63 +99,63 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'L') {
                 automata->state = PL;
             } else {
-                add_previous_chars(1, tokens, automata, 'P', c);
+                add_previous_chars(tokens, automata, 'P', 1, c);
             }
             break;
         case PR:
             if (c == 'I') {
                 automata->state = PRI;
             } else {
-                add_previous_chars(2, tokens, automata, 'P', 'R', c);
+                add_previous_chars(tokens, automata, 'P', 2, 'R', c);
             }
             break;
         case PRI:
             if (c == 'N') {
                 automata->state = PRIN;
             } else {
-                add_previous_chars(3, tokens, automata, 'P', 'R', 'I', c);
+                add_previous_chars(tokens, automata, 'P', 3, 'R', 'I', c);
             }
             break;
         case PRIN:
             if (c == 'T') {
                 make_and_add_simple_token(tokens, automata, t_print);
             } else {
-                add_previous_chars(4, tokens, automata, 'P', 'R', 'I', 'N', c);
+                add_previous_chars(tokens, automata, 'P', 4, 'R', 'I', 'N', c);
             }
             break;
         case PL:
             if (c == 'U') {
                 automata->state = PLU;
             } else {
-                add_previous_chars(2, tokens, automata, 'P', 'L', c);
+                add_previous_chars(tokens, automata, 'P', 2, 'L', c);
             }
             break;
         case PLU:
             if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_plus);
             } else {
-                add_previous_chars(3, tokens, automata, 'P', 'L', 'U', c);
+                add_previous_chars(tokens, automata, 'P', 3, 'L', 'U', c);
             }
             break;
         case S:
             if (c == 'E') {
                 automata->state = SE;
             } else {
-                add_previous_chars(1, tokens, automata, 'S', c);
+                add_previous_chars(tokens, automata, 'S', 1, c);
             }
             break;
         case SE:
             if (c == 'T') {
                 make_and_add_simple_token(tokens, automata, t_set);
             } else {
-                add_previous_chars(2, tokens, automata, 'S', 'E', c);
+                add_previous_chars(tokens, automata, 'S', 2, 'E', c);
             }
             break;
         case L:
             if (c == 'E') {
                 automata->state = LE;
             } else {
-                add_previous_chars(1, tokens, automata, 'L', c);
+                add_previous_chars(tokens, automata, 'L', 1, c);
             }
             break;
         case LE:
@@ -164,105 +164,105 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'N') {
                 automata->state = LEN;
             } else {
-                add_previous_chars(2, tokens, automata, 'L', 'E', c);
+                add_previous_chars(tokens, automata, 'L', 2, 'E', c);
             }
             break;
         case LES:
             if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_less);
             } else {
-                add_previous_chars(3, tokens, automata, 'L', 'E', 'S', c);
+                add_previous_chars(tokens, automata, 'L', 3, 'E', 'S', c);
             }
             break;
         case LEN:
             if (c == 'G') {
                 automata->state = LENG;
             } else {
-                add_previous_chars(3, tokens, automata, 'L', 'E', 'N', c);
+                add_previous_chars(tokens, automata, 'L', 3, 'E', 'N', c);
             }
             break;
         case LENG:
             if (c == 'T') {
                 automata->state = LENGT;
             } else {
-                add_previous_chars(4, tokens, automata, 'L', 'E', 'N', 'G', c);
+                add_previous_chars(tokens, automata, 'L', 4, 'E', 'N', 'G', c);
             }
             break;
         case LENGT:
             if (c == 'H') {
                 make_and_add_simple_token(tokens, automata, t_length);
             } else {
-                add_previous_chars(5, tokens, automata, 'L', 'E', 'N', 'G', 'T', c);
+                add_previous_chars(tokens, automata, 'L', 5, 'E', 'N', 'G', 'T', c);
             }
             break;
         case G:
             if (c == 'R') {
                 automata->state = GR;
             } else {
-                add_previous_chars(1, tokens, automata, 'G', c);
+                add_previous_chars(tokens, automata, 'G', 1, c);
             }
             break;
         case GR:
             if (c == 'E') {
                 automata->state = GRE;
             } else {
-                add_previous_chars(2, tokens, automata, 'G', 'R', c);
+                add_previous_chars(tokens, automata, 'G', 2, 'R', c);
             }
             break;
         case GRE:
             if (c == 'A') {
                 automata->state = GREA;
             } else {
-                add_previous_chars(3, tokens, automata, 'G', 'R', 'E', c);
+                add_previous_chars(tokens, automata, 'G', 3, 'R', 'E', c);
             }
             break;
         case GREA:
             if (c == 'T') {
                 automata->state = GREAT;
             } else {
-                add_previous_chars(4, tokens, automata, 'G', 'R', 'E', 'A', c);
+                add_previous_chars(tokens, automata, 'G', 3, 'R', 'E', 'A', c);
             }
             break;
         case GREAT:
             if (c == 'E') {
                 automata->state = GREATE;
             } else {
-                add_previous_chars(5, tokens, automata, 'G', 'R', 'E', 'A', 'T', c);
+                add_previous_chars(tokens, automata, 'G', 5, 'R', 'E', 'A', 'T', c);
             }
             break;
         case GREATE:
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_greater);
             } else {
-                add_previous_chars(6, tokens, automata, 'G', 'R', 'E', 'A', 'T', 'E', c);
+                add_previous_chars(tokens, automata, 'G', 6, 'R', 'E', 'A', 'T', 'E', c);
             }
             break;
         case E:
             if (c == 'Q') {
                 automata->state = EQ;
             } else {
-                add_previous_chars(1, tokens, automata, 'E', c);
+                add_previous_chars(tokens, automata, 'E', 1, c);
             }
             break;
         case EQ:
             if (c == 'U') {
                 automata->state = EQU;
             } else {
-                add_previous_chars(2, tokens, automata, 'E', 'Q', c);
+                add_previous_chars(tokens, automata, 'E', 2, 'Q', c);
             }
             break;
         case EQU:
             if (c == 'A') {
                 automata->state = EQUA;
             } else {
-                add_previous_chars(3, tokens, automata, 'E', 'Q', 'U', c);
+                add_previous_chars(tokens, automata, 'E', 3, 'Q', 'U', c);
             }
             break;
         case EQUA:
             if (c == 'L') {
                 make_and_add_simple_token(tokens, automata, t_equal);
             } else {
-                add_previous_chars(4, tokens, automata, 'E', 'Q', 'U', 'A', c);
+                add_previous_chars(tokens, automata, 'E', 4, 'Q', 'U', 'A', c);
             }
             break;
         case C:
@@ -273,48 +273,48 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else if (c == 'O') {
                 automata->state = CO;
             } else {
-                add_previous_chars(1, tokens, automata, 'C', c);
+                add_previous_chars(tokens, automata, 'C', 1, c);
             }
             break;
         case CA:
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_CAR);
             } else {
-                add_previous_chars(2, tokens, automata, 'C', 'A', c);
+                add_previous_chars(tokens, automata, 'C', 2, 'A', c);
             }
             break;
         case CD:
             if (c == 'R') {
                 make_and_add_simple_token(tokens, automata, t_CDR);
             } else {
-                add_previous_chars(2, tokens, automata, 'C', 'D', c);
+                add_previous_chars(tokens, automata, 'C', 2, 'D', c);
             }
             break;
         case CO:
             if (c == 'N') {
                 automata->state = CON;
             } else {
-                add_previous_chars(2, tokens, automata, 'C', 'O', c);
+                add_previous_chars(tokens, automata, 'C', 2, 'O', c);
             }
             break;
         case CON:
             if (c == 'S') {
                 make_and_add_simple_token(tokens, automata, t_CONS);
             } else {
-                add_previous_chars(3, tokens, automata, 'C', 'O', 'N', c);
+                add_previous_chars(tokens, automata, 'C', 3, 'O', 'N', c);
             }
             break;
     }
 }
 
-void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...) {
+void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n, ...) {
     add_variable_token(tokens, automata, var);
     if (n > 0) {
         va_list arg_ptr;
         int index = 0;
         va_start(arg_ptr, n);
         while (index < n) {
-            update_tokens(tokens, automata, va_arg(arg_ptr, char));
+            update_tokens(tokens, automata, va_arg(arg_ptr, int));
         }
         va_end(arg_ptr);
     }
