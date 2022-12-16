@@ -7,11 +7,11 @@
 
 CC      := gcc
 DEBUG   := -g3
-CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -Werror -Weverything
+CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -fsanitize=undefined -fsanitize=address
 
 
 debug: nuclei.c nuclei.h
-	$(CC) nuclei.c -o nuclei $(CFLAG) $(DEBUG)
+	$(CC) nuclei.c -o nuclei $(CFLAGS) $(DEBUG)
 
 run: nuclei
 	./nuclei test_code/demo1.ncl

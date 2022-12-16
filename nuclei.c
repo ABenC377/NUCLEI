@@ -20,6 +20,7 @@ void check_inputs(int argc, char* argv[]) {
     if (argc != 2) {
         throw_error("ERROR: invalid number of command line arguments\n");
     }
+    (void)argv; // To get rid of warning for now
 }
 
 Token_list* run_lexical_analyser(char* file_name) {
@@ -36,11 +37,11 @@ Token_list* run_lexical_analyser(char* file_name) {
 Token_list* get_tokens_from_file(FILE* fp) {
     Token_list* tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
-    char c = fgetc(fp);
+    char c = (char)fgetc(fp);
     while (c != EOF) {
         printf("Reading character '%c' (%i)\n", c, c); // debugging
         update_tokens(tokens, automata, c);
-        c = fgetc(fp);
+        c = (char)fgetc(fp);
     }
     free(automata);
     return tokens;
@@ -405,8 +406,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 update_tokens(tokens, automata, c);
             }
             break;
-        default:
-            throw_error("ERROR: invalid automata state\n");
     }
 }
 
@@ -589,7 +588,7 @@ void add_token(Token_list* tokens, Token* token) {
 }
 
 void* allocate_space(int num, int size) {
-    void* pointer = calloc(num, size);
+    void* pointer = calloc((unsigned long)num, (unsigned long)size);
     if (!pointer) {
         throw_error("ERROR: unable to allocate space\n");
     }
@@ -607,8 +606,10 @@ void free_token_list(Token_list* list) {
         if (current->value) {
             if (current->value->lexeme) {
                 free(current->value->lexeme);
+                current->value->lexeme = NULL;
             }
             free(current->value);
+            current->value = NULL;
         }
     }
     free(list);
