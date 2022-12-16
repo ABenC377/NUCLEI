@@ -7,49 +7,14 @@
 
 CC      := gcc
 DEBUG   := -g3
-OPTIM   := -O3
 CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -Werror -Weverything
-RELEASE := $(CFLAGS) $(OPTIM)
-SANI    := $(CFLAGS) -fsanitize=undefined -fsanitize=address $(DEBUG)
-VALG    := $(CFLAGS)  $(DEBUG)
-NCLS    := $(wildcard *.ncl)
-PRES := $(NCLS:.ncl=.pres)
-IRES := $(NCLS:.ncl=.ires)
-LIBS    := -lm
 
 
-parse: nuclei.c nuclei.h
-	$(CC) nuclei.c $(RELEASE) -o parse $(LIBS)
+debug: nuclei.c nuclei.h
+	$(CC) nuclei.c -o nuclei $(CFLAG) $(DEBUG)
 
-parse_s: nuclei.c nuclei.h
-	$(CC) nuclei.c $(SANI) -o parse_s $(LIBS)
-
-parse_v: nuclei.c nuclei.h
-	$(CC) nuclei.c $(VALG) -o parse_v $(LIBS)
-
-all: parse parse_s parse_v interp interp_s interp_v
-
-mac: parse parse_s interp interp_s
-
-interp: nuclei.c linked.c nuclei.h lisp.h
-	$(CC) nuclei.c linked.c $(RELEASE) -DINTERP -o interp $(LIBS)
-
-interp_s: nuclei.c linked.c nuclei.h lisp.h
-	$(CC) nuclei.c linked.c $(SANI) -DINTERP -o interp_s $(LIBS)
-
-interp_v: nuclei.c linked.c nuclei.h lisp.h
-	$(CC) nuclei.c linked.c $(VALG) -DINTERP -o interp_v $(LIBS)
-
-# For all .ncl files, run them and output result to a .pres (prase result) 
-# or .ires (interpretted result) file.
-runall : ./parse_s ./interp_s $(PRES) $(IRES)
-
-%.pres:
-	-./parse_s  $*.ncl > $*.pres 2>&1
-%.ires:
-	-./interp_s $*.ncl > $*.ires 2>&1
-
-clean:
-	rm -f parse parse_s parse_v interp interp_s interp_v $(PRES) $(IRES)
+run: nuclei
+	./nuclei test_code/demo1.ncl
+	./nuclei test_code/demo2.ncl
+	./nuclei test_code/demo3.ncl
 	
-zip: zip nuclei.zip Makefile linked.c nuclei.c lisp.h specific.h nuclei.h testing.txt extension.txt

@@ -38,7 +38,9 @@ Token_list* get_tokens_from_file(FILE* fp) {
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
     char c = fgetc(fp);
     while (c != EOF) {
+        printf("Reading character '%c' (%i)\n", c, c); // debugging
         update_tokens(tokens, automata, c);
+        c = fgetc(fp);
     }
     free(automata);
     return tokens;
