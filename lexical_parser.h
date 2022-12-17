@@ -69,7 +69,6 @@ typedef struct {
 
 Token_list* run_lexical_analyser(int argc, char* argv[]);
 char* get_file_name(int argc, char* argv[]);
-void check_inputs(int argc, char* argv[]);
 Token_list* get_tokens_from_file(FILE* fp);
 void update_tokens(Token_list* tokens, Automata* automata, char c);
 void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n, ...);

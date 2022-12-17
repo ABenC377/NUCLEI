@@ -2,6 +2,10 @@
 
 Token_list* run_lexical_analyser(int argc, char* argv[]) {
     char* file_name = get_file_name(argc, argv);
+    if (!file_name) {
+        throw_error("ERROR: incorrect usage - please provide an input file\n");
+    }
+    
     FILE* fp = fopen(file_name, "r");
     
     Token_list* tokens = get_tokens_from_file(fp);
@@ -12,15 +16,16 @@ Token_list* run_lexical_analyser(int argc, char* argv[]) {
 }
 
 char* get_file_name(int argc, char* argv[]) {
-    check_inputs(argc, argv);
-    return argv[1];
-}
-
-void check_inputs(int argc, char* argv[]) {
-    if (argc != 2) {
-        throw_error("ERROR: invalid number of command line arguments\n");
+    for (int i = 0; i < argc, i++) {
+        char* argument = argv[i];
+        int arg_length = strlen(argument);
+        for (int j = 0; j < (arg_length - 1); j++) {
+            if (argument[j] == '.') {
+                return argument;
+            }
+        }
     }
-    (void)argv; // To get rid of warning for now
+    return NULL;
 }
 
 Token_list* get_tokens_from_file(FILE* fp) {
@@ -515,6 +520,7 @@ void free_token_node(Token_node* node) {
 
 void lexical_parse_test(void) {
     
+    // char* get_file_name(int argc, char* argv[]) 
     // void update_tokens(Token_list* tokens, Automata* automata, char c);
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);
     // void make_and_add_simple_token(Token_list* tokens, Automata* automata, // token_type type);

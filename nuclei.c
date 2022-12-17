@@ -1,12 +1,19 @@
 #include "nuclei.h"
 
 int main(int argc, char* argv[]) {
-    
+    check_inputs(argc, argv);
     // Set up the file to be scanned
     Token_list* list = run_lexical_analyser(argc, argv);
     print_tokens(list);
     
     free_token_list(list);
+}
+
+void check_inputs(int argc, char* argv[]) {
+    if (argc != 2) {
+        throw_error("ERROR: invalid number of command line arguments\n");
+    }
+    (void)argv; // To get rid of warning for now
 }
 
 void* allocate_space(int num, int size) {
