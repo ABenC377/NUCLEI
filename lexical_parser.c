@@ -16,7 +16,7 @@ Token_list* run_lexical_analyser(int argc, char* argv[]) {
 }
 
 char* get_file_name(int argc, char* argv[]) {
-    for (int i = 0; i < argc, i++) {
+    for (int i = 1; i < argc; i++) {
         char* argument = argv[i];
         int arg_length = strlen(argument);
         for (int j = 0; j < (arg_length - 1); j++) {
@@ -41,9 +41,6 @@ Token_list* get_tokens_from_file(FILE* fp) {
 }
 
 void update_tokens(Token_list* tokens, Automata* automata, char c) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     switch (automata->state) {
         case start:
             handle_start_state(tokens, automata, c);
@@ -317,15 +314,12 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
 
 void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n, ...) {
     add_variable_token(tokens, automata, var);
-    if (n > 0) {
-        va_list arg_ptr;
-        int index = 0;
-        va_start(arg_ptr, n);
-        while (index < n) {
-            update_tokens(tokens, automata, va_arg(arg_ptr, int));
-        }
-        va_end(arg_ptr);
+    va_list arg_ptr;
+    va_start(arg_ptr, n);
+    for (int i = 0; i < n; i++) {
+        update_tokens(tokens, automata, va_arg(arg_ptr, int));
     }
+    va_end(arg_ptr);
 }
 
 // This only works for token types that do not have a lexeme or other value
@@ -537,10 +531,13 @@ void lexical_parse_test(void) {
     test_file_name = get_file_name(test_argc, test_argv);
     assert(strcmp(test_file_name, test_argv[2]) == 0);
     
-    test_argv[2] = "aslo_not_a_file_name";
+    test_argv[2] = "also_not_a_file_name";
     test_file_name = get_file_name(test_argc, test_argv);
     assert(!test_file_name);
+    
     // void update_tokens(Token_list* tokens, Automata* automata, char c);
+    
+    
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);
     // void make_and_add_simple_token(Token_list* tokens, Automata* automata, // token_type type);
     // void handle_start_state(Token_list* tokens, Automata* automata, char c);

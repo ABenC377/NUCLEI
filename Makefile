@@ -14,7 +14,18 @@ debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei $(CFLAGS) $(DEBUG)
 
 run: nuclei
+	./nuclei test_code/basic_print.ncl
 	./nuclei test_code/demo1.ncl
 	./nuclei test_code/demo2.ncl
 	./nuclei test_code/demo3.ncl
+	./nuclei test_code/fibonacci.ncl
+	./nuclei test_code/inf_loop.ncl
+	./nuclei test_code/parse_fail.ncl
+	./nuclei test_code/parse_pass_interp_fail.ncl
+	./nuclei test_code/print_set.ncl
+	./nuclei test_code/simple_loop.ncl
+	./nuclei test_code/test.ncl
+	./nuclei test_code/triv.ncl
 	
+run_simple: nuclei
+	./nuclei test_code/demo1.ncl

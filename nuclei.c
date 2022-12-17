@@ -1,6 +1,7 @@
 #include "nuclei.h"
 
 int main(int argc, char* argv[]) {
+    test();
     check_inputs(argc, argv);
     // Set up the file to be scanned
     Token_list* list = run_lexical_analyser(argc, argv);

@@ -1,4 +1,4 @@
 (
-  (SET A '1')
-  (PRINT A)
+    (SET A '1')
+    (PRINT A)
 )
