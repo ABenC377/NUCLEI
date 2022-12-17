@@ -19,7 +19,9 @@ The following functions are assert tested in the lexical_parse_test() function a
     
 
 - add_variable_token()
-    This function adds a token of type variable to the token list.  The name of the variable (i.e., A-Z) is provided as an input.  I've 
+    This function adds a token of type variable to the token list.  The name of the variable (i.e., A-Z) is provided as an input.  I've tested this function against each possible varibale name to confirm that a correctly named token is added to the token list.  
+    This function is only called in add_previous_chars() and handle_start_state().  in add_previous_chars(), it is called in relation to the var argument, which is only ever a capitalised letter (see the switch statement in update_tokens()).  In handle_start_state(), this function is only called in the event of a character that is A-Z.  Therefore, we know that this function is only ever called with a name that is valid (i.e., A-Z).  Therefore, we do not need to handle incorrect names, and I have not tested for this.
+    Similarly, because the tokens and automata arguments of this function are always passed directly from the arguments of the functions that call it (i.e., add_previous_chars() and handle_start_state()), we know that they must be valid (otherwise the higher up functions would have failed).  Therefore, I have not tested for this.
 
 - add_token()
     

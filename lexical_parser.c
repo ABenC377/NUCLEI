@@ -409,9 +409,6 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
 }
 
 void add_variable_token(Token_list* tokens, Automata* automata, char name) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     automata->token = (Token*)allocate_space(1, sizeof(Token));
     automata->token->type = t_variable;
     automata->token->var_name = name;
