@@ -316,9 +316,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
 }
 
 void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n, ...) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     add_variable_token(tokens, automata, var);
     if (n > 0) {
         va_list arg_ptr;
@@ -333,9 +330,6 @@ void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n,
 
 // This only works for token types that do not have a lexeme or other value
 void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     automata->state = start;
     Token* new_token = (Token*)allocate_space(1, sizeof(Token));
     new_token->type = type;
