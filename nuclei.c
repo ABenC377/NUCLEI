@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
     check_inputs(argc, argv);
     // Set up the file to be scanned
     Token_list* list = run_lexical_analyser(argc, argv);
-    print_tokens(list);
+    print_tokens(list); // debugging
     
     free_token_list(list);
 }
