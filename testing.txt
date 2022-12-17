@@ -16,12 +16,16 @@ The following functions are assert tested in the lexical_parse_test() function a
     This function makes a token of a given type, adds it to the tokens list, and resets the automata to its start state.  It only works for token types that don't have additional information (i.e., all but literal, string and variable token types).  I have tested this function against each of the simple token types to check that it successfully adds a token of that type to the token list.  This function is only ever called when a simple token is to be added, and so there is no need to test it with complex token type inputs.
 
 - handle_start_state()
-    
+    This function checks the character that is provided from the file, and handles it correctly.  There are five types of valid characters according to the grammar of NUCLEI: 1) white space - this should be ignored; 2) parentheses - these are individual tokens and should be added to the token list; 3) a single quote - this signifies the beginning of a literal; 4) a double quote - this signifies the beginning of a string; and 5) a capitalised letter - this is either a variable or the beginning of a reserved word, and should be handled accordingly.  If the character is none of these, then the function adds an 'invalid' token to the token list.  To test this function, I have assert tested it with characters of each of the above types (including invalid) to ensure that they are handled correctly.
+    This function is only called from update_tokens(), when the automata is in the start state.  It is passed the tokens and automata arguments directly from the arguments of this higher function.  Therefore, we do not need to check that these arguments are valid, because this has been checked higher up.  Therefore, I have not tested for this.
 
 - add_variable_token()
     This function adds a token of type variable to the token list.  The name of the variable (i.e., A-Z) is provided as an input.  I've tested this function against each possible varibale name to confirm that a correctly named token is added to the token list.  
     This function is only called in add_previous_chars() and handle_start_state().  in add_previous_chars(), it is called in relation to the var argument, which is only ever a capitalised letter (see the switch statement in update_tokens()).  In handle_start_state(), this function is only called in the event of a character that is A-Z.  Therefore, we know that this function is only ever called with a name that is valid (i.e., A-Z).  Therefore, we do not need to handle incorrect names, and I have not tested for this.
     Similarly, because the tokens and automata arguments of this function are always passed directly from the arguments of the functions that call it (i.e., add_previous_chars() and handle_start_state()), we know that they must be valid (otherwise the higher up functions would have failed).  Therefore, I have not tested for this.
+
+- handle_in_state()
+    
 
 - add_token()
     

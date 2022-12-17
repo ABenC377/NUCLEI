@@ -356,14 +356,10 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
         case '\r':
             break;
         case ')':
-            automata->token = (Token*)allocate_space(1, sizeof(Token));
-            automata->token->type = t_r_parenthesis;
-            add_token(tokens, automata->token);
+            make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             break;
         case '(':
-            automata->token = (Token*)allocate_space(1, sizeof(Token));
-            automata->token->type = t_l_parenthesis;
-            add_token(tokens, automata->token);
+            make_and_add_simple_token(tokens, automata, t_l_parenthesis);
             break;
         case SINGLEQUOTE:
             automata->token = (Token*)allocate_space(1, sizeof(Token));
