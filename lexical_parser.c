@@ -524,8 +524,22 @@ void free_token_node(Token_node* node) {
 }
 
 void lexical_parse_test(void) {
-    
     // char* get_file_name(int argc, char* argv[]) 
+    int test_argc = 3;
+    char* test_argv[3];
+    test_argv[0] = "./nuclei";
+    test_argv[1] = "folder/file.ncl";
+    test_argv[2] = "folder/other.ncl";
+    char* test_file_name = get_file_name(test_argc, test_argv);
+    assert(strcmp(test_file_name, test_argv[1]) == 0);
+    
+    test_argv[1] = "not_a_file.";
+    test_file_name = get_file_name(test_argc, test_argv);
+    assert(strcmp(test_file_name, test_argv[2]) == 0);
+    
+    test_argv[2] = "aslo_not_a_file_name";
+    test_file_name = get_file_name(test_argc, test_argv);
+    assert(!test_file_name);
     // void update_tokens(Token_list* tokens, Automata* automata, char c);
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);
     // void make_and_add_simple_token(Token_list* tokens, Automata* automata, // token_type type);

@@ -5,6 +5,7 @@ ___Lexical parser testing___
 The following functions are assert tested in the lexical_parse_test() function as described:
 - get_file_name()
     This function takes argc and argv as inputs, and outputs the file name if one is provided as an argv argument.  To check this, it looks for an argument that has a '.' in a non-final position.  If there are more than one file names provided, then the function returns the first file name provided.  If there are no file names provided, then the function returns NULL.  To test this function, I have assert tested that it provides the correct file name when given sets of argv strings that contain a valid file name, and NULL when it isn't.
+    The argc and argv arguments for this function are passed directly from the command line, and so argc and argv should be consistent (i.e., there should be argc elements in argv).  Therefore, the function does not handle inconsistent arguments, and I have not tested its behavious with inconsistent arguments.
 
 - update_tokens()
     This function takes in the pre-made token-list, FSM automata, and a character.  The behavious is dictated by the state of the automata, and c.  Therefore, I test it with an automata in every state, and for each state, each type of character (e.g., each type of expected character, and imaginable unexpected characters).
