@@ -343,9 +343,6 @@ void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_typ
 }
 
 void handle_start_state(Token_list* tokens, Automata* automata, char c) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     switch (c) {
         // White space should be ignored
         case ' ':
@@ -413,9 +410,6 @@ void add_variable_token(Token_list* tokens, Automata* automata, char name) {
 }
 
 void handle_in_state(Token_list* tokens, Automata* automata, char c) {
-    if (!(tokens) || !(automata)) {
-        throw_error("ERROR: cannot add token - either automata or token list is NULL\n");
-    }
     if ((automata->state == in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
         automata->state = start;
@@ -508,15 +502,14 @@ void print_token(Token_node* node) {
 }
 
 void add_token(Token_list* tokens, Token* token) {
-    if (!(tokens) || !(token)) {
-        throw_error("ERROR: cannot add token - either token list or token is NULL\n");
-    }
-    Token_node* new_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
-    new_token_node->value = token;
-    if (!(tokens->start)) {
-        tokens->start = tokens->end = new_token_node;
-    } else {
-        tokens->end = tokens->end->next = new_token_node;
+    if (token) {
+        Token_node* new_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
+        new_token_node->value = token;
+        if (!(tokens->start)) {
+            tokens->start = tokens->end = new_token_node;
+        } else {
+            tokens->end = tokens->end->next = new_token_node;
+        }
     }
 }
 

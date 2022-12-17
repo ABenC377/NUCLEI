@@ -25,10 +25,12 @@ The following functions are assert tested in the lexical_parse_test() function a
     Similarly, because the tokens and automata arguments of this function are always passed directly from the arguments of the functions that call it (i.e., add_previous_chars() and handle_start_state()), we know that they must be valid (otherwise the higher up functions would have failed).  Therefore, I have not tested for this.
 
 - handle_in_state()
-    
+    This function is called when a character is recieved while the automata is in either the 'in_literal' or'in_string' state.  It checks whether the character is ending the literal/string (i.e., whether it it a single or double quote, respectively).  If it is ending the literal/string, then it adds the token to the token list.  Otherwise it adds the new character to the lexeme string of the token associated with the automata.  I have tested this function by running it in both 'in_literal' and 'in_string' states with both closing and non-closing characters, to make sure that the string is updated correctly, and that the token is added to the token list correctly.
+    Because this function is only called from update_tokens() when the automata state is either 'in_string' or 'in_literal' (see the switch statement in update_tokens()), I have not tested the function with non-intenedd automata states.  Further, the tokens and automata arguments are carried over directly from the update_tokens arguments, and so have already been checked.  Therefore, unintended values are not tested for this function.
 
 - add_token()
-    
+    This function adds a token to the end of a token list.  I have tested it with tokens of every token type to ensure that it correctly adds the token to the token list, as well as providing it with a NULL token pointer to ensure that it simply leaves the token list as it.
+    add_token() is called from make_and_add_simple_token(), handle_start_state(), add_variable_token(), and handle_in_state().  In each of these functions, add_token() is passed its tokens argument directly from the tokens argument that was passed to them.  Therefore, this argument will always have been checked when add_token() is called, and so add_token() does not need to handle invalid token lists, and I have not tested that it does so.
 
 
 The following functions rely on command line arguments and reading from files, and so are not testable with quiet assert testing:
