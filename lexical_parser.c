@@ -496,7 +496,9 @@ void add_token(Token_list* tokens, Token* token) {
         if (!(tokens->start)) {
             tokens->start = tokens->end = new_token_node;
         } else {
+            Token_node* temp = tokens->end;
             tokens->end = tokens->end->next = new_token_node;
+            tokens->end->previous = temp;
         }
     }
 }

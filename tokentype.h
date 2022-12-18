@@ -18,7 +18,7 @@ typedef enum {
     t_l_parenthesis, 
     t_r_parenthesis,
     t_invalid
-} token_type;
+} token_type; 
 
 typedef struct {
     token_type type;
@@ -29,6 +29,7 @@ typedef struct {
 typedef struct Token_node {
     Token* value;
     struct Token_node* next;
+    struct Token_node* previous;
 } Token_node;
 
 typedef struct Token_list {
