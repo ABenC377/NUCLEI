@@ -519,7 +519,7 @@ void free_token_node(Token_node* node) {
     }
 }
 
-void lexical_parse_test(void) {
+void lexical_analysis_test(void) {
     // char* get_file_name(int argc, char* argv[]) 
     int test_argc = 3;
     char* test_argv[3];

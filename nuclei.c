@@ -36,6 +36,6 @@ void throw_error(const char* error_message) {
 }
 
 void test(void) {
-    lexical_parse_test();
-    
+    lexical_analysis_test();
+    parse_test();
 }

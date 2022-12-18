@@ -18,4 +18,5 @@ bool is_print(Token_node** start);
 bool is_if(Token_node** start);
 bool is_loop(Token_node** start);
 bool is_list(Token_node** start);
+void parse_test(void);
 

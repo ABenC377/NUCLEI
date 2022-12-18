@@ -44,4 +44,4 @@ void print_token(Token_node* node);
 void add_token(Token_list* tokens, Token* token);
 void free_token_list(Token_list* list);
 void free_token_node(Token_node* node);
-void lexical_parse_test(void);
+void lexical_analysis_test(void);
