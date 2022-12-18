@@ -28,4 +28,4 @@ run: nuclei
 	./nuclei test_code/triv.ncl
 	
 run_simple: nuclei
-	./nuclei test_code/test.ncl
+	./nuclei test_code/demo1.ncl
