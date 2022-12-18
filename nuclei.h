@@ -1,5 +1,7 @@
 // #include "specific.h"
 #include "lexical_parser.h"
+#include "parse.h"
+#include "interpret.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
