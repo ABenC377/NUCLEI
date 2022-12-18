@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     #ifdef INTERP
     parse_and_interpret(list);
     #else
-    parse(list);
+    parse_list(list);
     #endif
     
     free_token_list(list);

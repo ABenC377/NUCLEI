@@ -1,43 +1,48 @@
 #include "parse.h"
 
-void parse(Token_list* list) {
-    return is_prog(list->start);
+void parse_list(Token_list* list) {
+    if (is_prog(list->start)) {
+        printf("Parse: yes\n");
+    } else {
+        printf("Parse: no\n");
+    }
 }
 
 bool is_prog(Token_node* start) {
     if (start->value->type != t_l_parenthesis) {
         return false;
     } else {
-        return is_instrcts(start->next);
+        return is_instrcts(&(start->next));
     }
 }
 
-bool is_instrcts(Token_node* start) {
-    if (start->value->type == t_r_parenthesis) {
+bool is_instrcts(Token_node** start) {
+    Token_node* start_node = *start;
+    if (start_node->value->type == t_r_parenthesis) {
+        *start = start_node->next;
         return true;
     } else {
-        Token_node* current = start;
-        if (!is_instrct(&current)) {
+        if (!is_instrct(&start_node)) {
             return false;
         } else {
-            return is_instrcts(current);
+            return is_instrcts(&start_node);
         }
     }
 }
 
 bool is_instrct(Token_node** start) {
-    Token_node* start_pointer = *start;
-    if ((*start)->value->type != t_l_parenthesis) {
+    Token_node* start_node = *start;
+    if (start_node->value->type != t_l_parenthesis) {
         return false;
     }
-    (*start) = (*start)->next;
-    if (!is_func(start)) {
-        return false
+    start_node = start_node->next;
+    if (!is_func(&start_node)) {
+        return false;
     }
-    if ((*start)->value->type != t_r_parenthesis) {
+    if (start_node->value->type != t_r_parenthesis) {
         return false;
     } else {
-        (*start) = (*start)->next
+        *start = start_node->next;
         return true;
     }
 }
@@ -72,9 +77,8 @@ bool is_listfunc(Token_node** start) {
                 return true;
             }
         }
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool is_intfunc(Token_node** start) {
@@ -93,9 +97,8 @@ bool is_intfunc(Token_node** start) {
             *start = start_node;
             return true;
         }
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool is_boolfunc(Token_node** start) {
@@ -124,9 +127,8 @@ bool is_boolfunc(Token_node** start) {
                 return true;
             }
         }
-    } else {
-        return false;
     }
+    return false;
 }
 
 bool is_iofunc(Token_node** start) {
@@ -136,7 +138,7 @@ bool is_iofunc(Token_node** start) {
 bool is_set(Token_node** start) {
     Token_node* start_node = *start;
     if (start_node->value->type == t_set) {
-        start_node = start_node->next
+        start_node = start_node->next;
         if (start_node->value->type == t_variable) {
             start_node = start_node->next;
             if (is_list(&start_node)) {
@@ -152,7 +154,11 @@ bool is_print(Token_node** start) {
     Token_node* start_node = *start;
     if (start_node->value->type == t_print) {
         start_node = start_node->next;
-        if (is_list(&start_node) || is_string(&start_node)) {
+        if (is_list(&start_node)) {
+            *start = start_node;
+            return true;
+        } else if (start_node->value->type == t_string) {
+            start_node = start_node->next;
             *start = start_node;
             return true;
         }
@@ -173,11 +179,11 @@ bool is_if(Token_node** start) {
     if (!is_boolfunc(&start_node)) {
         return false;
     }
-    if (start_node->value->next != t_r_parenthesis) {
+    if (start_node->value->type != t_r_parenthesis) {
         return false;
     }
     start_node = start_node->next;
-    if (start_node->vlaue->next != t_l_parenthesis) {
+    if (start_node->value->type != t_l_parenthesis) {
         return false;
     }
     start_node = start_node->next;
@@ -208,11 +214,11 @@ bool is_loop(Token_node** start) {
     if (!is_boolfunc(&start_node)) {
         return false;
     }
-    if (start_node->value->next != t_r_parenthesis) {
+    if (start_node->value->type != t_r_parenthesis) {
         return false;
     }
     start_node = start_node->next;
-    if (start_node->vlaue->next != t_l_parenthesis) {
+    if (start_node->value->type != t_l_parenthesis) {
         return false;
     }
     start_node = start_node->next;
@@ -231,7 +237,7 @@ bool is_list(Token_node** start) {
     } else if (start_node->value->type == t_literal) {
         *start = (*start)->next;
         return true;
-    } else if (start_node->value->next == t_nil) {
+    } else if (start_node->value->type == t_nil) {
         *start = (*start)->next;
         return true;
     } else if (start_node->value->type == t_l_parenthesis) {

@@ -1,3 +1,5 @@
+#pragma once 
+
 typedef enum {
     t_literal, 
     t_string, 

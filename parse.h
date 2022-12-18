@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void parse(Token_list* list);
+void parse_list(Token_list* list);
 bool is_prog(Token_node* start);
-bool is_instrcts(Token_node* start);
+bool is_instrcts(Token_node** start);
 bool is_instrct(Token_node** start);
 bool is_func(Token_node** start);
 bool is_retfunc(Token_node** start);
