@@ -301,7 +301,7 @@ bool is_list(Token_node** start) {
 //        printf("List found (variable)\n"); // debugging
 //        parse_print_remaining_tokens(start_node); // debugging
         return true;
-    } else if (start_node->value->type == t_literal) {
+    } else if ((start_node->value->type == t_literal) && is_valid_literal(start_node->value->lexeme)) {
         *start = (*start)->next;
 //        printf("List found (literal)\n"); // debugging
 //        parse_print_remaining_tokens(start_node); // debugging
@@ -326,6 +326,78 @@ bool is_list(Token_node** start) {
         return true;
     }
     return false;
+}
+
+bool is_valid_literal(char* literal_string) {
+    return (even_parentheses(literal_string) && valid_chars(literal_string) && no_hanging_atoms(literal_string));
+}
+
+bool even_parentheses(char* literal_string) {
+    int open_parentheses = 0;
+    int str_len = strlen(literal_string);
+    for (int i = 0; i < str_len; i++) {
+        if (literal_string[i] == '(') {
+            open_parentheses++;
+        } else if (literal_string[i] == ')') {
+            open_parentheses--;
+        }
+        
+        if (open_parentheses < 0) {
+            return false;
+        }
+    }
+    
+    return (open_parentheses == 0);
+}
+
+bool valid_chars(char* literal_string) {
+    int str_len = strlen(literal_string);
+    for (int i = 0; i < str_len; i++) {
+        if (!valid_char(literal_string[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool valid_char(char c) {
+    switch (c) {
+        case '0' ... '9':
+        case '(':
+        case ')':
+        case '-':
+        case ' ':
+        case '\n':
+        case '\t':
+        case '\v':
+        case '\f':
+        case '\r':
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+}
+
+bool no_hanging_atoms(char* literal_string) {
+    int open_parentheses = 0;
+    int str_len = strlen(literal_string);
+    for (int i = 0; i < str_len; i++) {
+        if (literal_string[i] == '(') {
+            open_parentheses++;
+        } else if (literal_string[i] == ')') {
+            open_parentheses--;
+        }
+        
+        if (open_parentheses == 0) {
+            char c = literal_string[i];
+            if ((c == ' ') || (c == '\n') || (c == '\t') || (c == '\v') || (c == '\f') || (c == '\r')) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void parse_test(void) {
