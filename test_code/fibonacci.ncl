@@ -1,4 +1,3 @@
-# First 20 Fibonacci Numbers 
 (
     (SET L '(1 0)')
     (SET C '2')

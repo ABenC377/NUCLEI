@@ -20,7 +20,6 @@ run: nuclei
 	./nuclei test_code/demo3.ncl
 	./nuclei test_code/fibonacci.ncl
 	./nuclei test_code/inf_loop.ncl
-	./nuclei test_code/parse_fail.ncl
 	./nuclei test_code/parse_pass_interp_fail.ncl
 	./nuclei test_code/print_set.ncl
 	./nuclei test_code/simple_loop.ncl
