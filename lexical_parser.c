@@ -406,7 +406,9 @@ void handle_in_state(Token_list* tokens, Automata* automata, char c) {
         automata->state = start;
     } else {
         int index = 0;
-        while ((++index < LEXEMEMAXLEN) && (automata->token->lexeme[index] != '\0')) {}
+        while ((index < LEXEMEMAXLEN) && (automata->token->lexeme[index] != '\0')) {
+            index++;
+        }
         if (index == LEXEMEMAXLEN) {
             throw_error("ERROR: literal lexeme greater than maximum allowed string length\n");
         }

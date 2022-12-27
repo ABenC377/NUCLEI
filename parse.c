@@ -1,7 +1,7 @@
 #include "parse.h"
 
 void parse_list(Token_list* list) {
-//    parse_print_tokens(list); // debugging
+    //parse_print_tokens(list); // debugging
     if (is_prog(&(list->start))) {
         printf("Parsed OK\n");
     } else {
@@ -381,23 +381,35 @@ bool valid_char(char c) {
 }
 
 bool no_hanging_atoms(char* literal_string) {
-    int open_parentheses = 0;
+    // printf("literal string is %s\n", literal_string); // debugging
     int str_len = strlen(literal_string);
-    for (int i = 0; i < str_len; i++) {
-        if (literal_string[i] == '(') {
-            open_parentheses++;
-        } else if (literal_string[i] == ')') {
-            open_parentheses--;
+    if (literal_string[0] == '(') {
+        int open_parentheses = 1;
+        for (int i = 1; i < str_len; i++) {
+            if (open_parentheses == 0) {
+                // printf("hanging atom - chars after final closed parenthesis\n"); // debugging
+                return false;
+            }
+            if (literal_string[i] == '(') {
+                open_parentheses++;
+            } else if (literal_string[i] == ')') {
+                open_parentheses--;
+            }
         }
-        
-        if (open_parentheses == 0) {
-            char c = literal_string[i];
-            if ((c == ' ') || (c == '\n') || (c == '\t') || (c == '\v') || (c == '\f') || (c == '\r')) {
+        return true;
+    } else if ((literal_string[0] != '-') && !(isdigit(literal_string[0]))) {
+        // printf("hanging atom - first char not ( or a number\n"); // debugging
+        return false;
+    } else {
+        for (int i = 1; i < str_len; i++) {
+            if (!(isdigit(literal_string[i]))) {
+                // printf("hanging atom - characters after first number\n"); // debugging
                 return false;
             }
         }
+        return true;
     }
-    return true;
+    
 }
 
 void parse_test(void) {
@@ -435,13 +447,13 @@ void parse_print_remaining_tokens(Token_node* node) {
 void parse_print_token(Token_node* node) {
     switch (node->value->type) {
         case t_literal:
-            printf("<LITERAL>");
+            printf("<LITERAL - %s>", node->value->lexeme);
             break;
         case t_string:
-            printf("<STRING>");
+            printf("<STRING - %s>", node->value->lexeme);
             break;
         case t_variable:
-            printf("<VARIABLE>");
+            printf("<VARIABLE - %c>", node->value->var_name);
             break;
         case t_nil:
             printf("NIL");
