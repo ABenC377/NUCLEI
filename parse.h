@@ -1,9 +1,12 @@
 #include "tokentype.h"
+#include "syntaxtree.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+
 
 void parse_list(Token_list* list);
 bool is_prog(Token_node** start);
