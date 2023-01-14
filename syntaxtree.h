@@ -19,7 +19,8 @@ typedef enum {
     LIST,
     VAR,
     STRING,
-    LITERAL
+    LITERAL,
+    NIL
 } grammar_type
 
 typedef struct Tree_node {
@@ -29,6 +30,7 @@ typedef struct Tree_node {
     token_type func_type;
     struct Tree_node* child1;
     struct Tree_node* child2;
+    struct Tree_node* child3;
 } Tree_node;
 
 typedef struct {
