@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
     check_inputs(argc, argv);
     // Set up the file to be scanned
     Token_list* list = run_lexical_analyser(argc, argv);
-    print_tokens(list); // debugging
+    // print_tokens(list); // debugging
 
     parse_list(list);
     
@@ -28,14 +28,13 @@ void parse_list(Token_list* list) {
     // printf("\n"); // debugging
     bool parses_correctly = true;
     tree->program = descend_recursively(&current, &parses_correctly);
-    print_tree(tree); // debugging
+    // print_tree(tree); // debugging
     if (parses_correctly) {
         printf("Parsed OK\n");
         free_tree(tree);
     } else {
-        fprintf(stderr, "PARSING ERROR - syntactically invalid NUCLEI program\n");
+        printf("Not parsed correctly\n");
         free_tree(tree);
-        exit(EXIT_FAILURE);
     }
 }
 

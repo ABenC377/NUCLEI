@@ -3,7 +3,6 @@
 // #include "specific.h"
 #include "./lexical_parser.h"
 #include "./tokentype.h"
-#include "./syntaxtree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -12,6 +11,40 @@
 #include <assert.h>
 #include <stdarg.h>
 
+typedef enum {
+    PROG,
+    INSTRCTS,
+    INSTRCT,
+    FUNC,
+    RETFUNC,
+    LISTFUNC,
+    INTFUNC,
+    BOOLFUNC,
+    IOFUNC,
+    SET,
+    PRINT,
+    IF,
+    LOOP,
+    LIST,
+    VAR,
+    STRING,
+    LITERAL,
+    NIL
+} grammar_type;
+
+typedef struct Tree_node {
+    grammar_type type;
+    char var_name;
+    char* string_value;
+    token_type func_type;
+    struct Tree_node* child1;
+    struct Tree_node* child2;
+    struct Tree_node* child3;
+} Tree_node;
+
+typedef struct {
+    Tree_node* program;
+} Syntax_tree;
 
 void check_inputs(int argc, char* argv[]);
 void parse_list(Token_list* list);

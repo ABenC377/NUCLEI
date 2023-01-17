@@ -10,7 +10,7 @@ DEBUG   := -g3
 CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -fsanitize=undefined -fsanitize=address
 
 
-debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h 
+debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei $(CFLAGS) $(DEBUG)
 
 run: nuclei
