@@ -15,37 +15,32 @@ void parse_list(Token_list* list) {
 
 Tree_node* descend_recursively(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* program = make_node(PROG);
-    if ((current*)->value->type != t_l_parenthesis) {
+    if (next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
     } else {
-        (current*) = (current*)->next;
         program->child1 = handle_INSTRCTS(tree, current, parses_correctly);
     }
     return program;
 }
 
 Tree_node* handle_INSTRCTS(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
-    Tree_node* instructions = make_node(INSTRCTS);
-    if ((current*)->value->type == t_r_parenthesis) {
-        current* = (current*)->next;
+    if (next_token_is(current, 1, t_r_parenthesis)) {
+        return NULL;
     } else {
+        Tree_node* instructions = make_node(INSTRCTS);
         instructions->child1 = handle_INSTRCT(tree, current, parses_correctly);
         instructions->child2 = handle_INSTRCTS(tree, current, parses_correctly);
+        return instructions;
     }
-    return instructions;
 }
 
 Tree_node* handle_INSTRCT(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
-    Tree_node* instruction = make_node(INSTRCT);
-    if ((current*)->value->type == t_l_parenthesis) {
-        current* = (current*)->next;
-    } else {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
     }
+    Tree_node* instruction = make_node(INSTRCT);
     instruction->child1 = handle_FUNC(tree, current, parses_correctly);
-    if ((current*)->value->type == t_r_parenthesis) {
-        current* = (current*)->next;
-    } else {
+    if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(parses_correctly);
     }
     return instruction;
@@ -107,32 +102,22 @@ bool is_IF(Token_node* current) {
 
 Tree_node* handle_IF(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* if_node = make_node(IF);
-    if ((current*)->value->type != t_if) {
+    if (!next_token_is(current, 1, t_if)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
-    if ((current*)->value->type != t_l_parenthesis) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
     if_node->child1 = handle_BOOLFUNC(tree, current, parses_correctly);
-    if ((current*)->value->type != t_r_parenthesis) {
+    if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
-    if ((current*)->value->type != t_l_parenthesis) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
     if_node->child2 = handle_INSTRCTS(tree, current, parses_correctly);
-    if ((current*)->value->type != t_r_parenthesis) {
+    if (!next_token_is(current, ,1, t_r_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
     if_node->child3 = handle_INSTRCTS(tree, current, parses_correctly);
     return if_node;
@@ -144,26 +129,18 @@ bool is_LOOP(Token_node* current) {
 
 Tree_node* handle_LOOP(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* loop = make_node(LOOP);
-    if ((current*)->value->type != t_while) {
+    if (!next_token_is(current, 1, t_while)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
-    if ((current*)->value->type != t_l_parenthesis) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
     loop->child1 = handle_BOOLFUNC(tree, current, parses_correctly);
-    if ((current*)->value->type != t_r_parenthesis) {
+    if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
-    if ((current*)->value->type != t_l_parenthesis) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
-    } else {
-        current* = (current*)->next;
     }
     loop->child2 = handle_INSTRCTS(tree, current, parses_correctly);
     return loop;
@@ -177,11 +154,10 @@ bool is_LISTFUNC(Token_node* current) {
 Tree_node* handle_LISTFUNC(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* list_function = make_node(LISTFUNC);
     token_type type = (current*)->value->type;
-    if (type != t_CAR && type != t_CDR && type != t_CONS) {
+    if (!next_token_is(current, 3, t_CAR, t_CDR, t_CONS)) {
         return parser_fails(parses_correctly);
     } else {
         list_function->func_type = type;
-        current* = (current*)->next;
     }
     list_function->child1 = handle_LIST(tree, current, parses_correctly);
     if (type == t_CONS) {
@@ -199,11 +175,10 @@ bool is_INTFUNC(Token_node* current) {
 Tree_node* handle_INTFUNC(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* int_function = make_node(INTFUNC);
     token_type type = (current*)->value->type
-    if (type != t_plus && type != t_length) {
+    if (!next_token_is(current, 2, t_plus, t_length)) {
         return parser_fails(parses_correctly);
     } else {
         int_function->func_type = type;
-        current* = (current*)->next;
         int_function->child1 = handle_LIST(tree, current, parses_correctly);
     }
     if (type == t_plus) {
@@ -219,12 +194,11 @@ bool is_BOOLFUNC(Token_node* current) {
 
 Tree_node* handle_BOOLFUNC(Syntax_tree* tree, Token_node** current, bool* parses_correctly) {
     Tree_node* bool_function = make_node(BOOLFUNC);
-    token_type type = (current*)->vlaue->type;
-    if (type != t_less && type != t_greater && type != t_equal) {
+    token_type type = (current*)->value->type;
+    if (!next_token_is(current, 3, t_less, t_greater, t_equal)) {
         return parser_fails(parses_correctly);
     } else {
         bool_function->func_type = type;
-        current* = (current*)->next;
         bool_function->child1 = handle_LIST(tree, current, parses_correctly);
         bool_function->child2 = handle_LIST(tree, current, parses_correctly);
     }
@@ -240,15 +214,14 @@ Tree_node* handle_LIST(Syntax_tree* tree, Token_node** current, bool* parses_cor
         list->child1 = handle_LITERAL(tree, current, parses_correctly);
     } else if (type == t_nil) {
         list->child1 = handle_NIL(tree, current, parses_correctly);
-    } else if (type != t_l_parenthesis) {
+    } else if (next_token_is(current, 1, t_l_parenthesis)) {
+        list->child1 = handle_RETFUNC(tree, current, parses_correctly);
+        if (!next_token_is(current, 1, t_r_parenthesis)) {
+            return parser_fails(parses_correctly);
+        }
+    } else {
         return parser_fails(parses_correctly);
     }
-    current* = (current*)->next;
-    list->child1 = handle_RETFUNC(tree, current, parses_correctly);
-    if ((current*)->value->type != t_r_parenthesis) {
-        return parser_fails(parses_correctly);
-    }
-    current* = (current*)->next;
     return list;
 }
 
@@ -278,4 +251,21 @@ Tree_node* make_node(grammar_type type) {
 Tree_node* parser_fails(bool* parses_correctly) {
     parses_correctly* = false;
     return NULL;
+}
+
+// Make a function which checks whether the next token is x (or one of a list x, y,...), and then either moves on to the next token if it is, or changes bool to false and returns NULL if it isnt.
+bool next_token_is(Token_node** current, int num_possible_tokens, ...) {
+    if (num_possible_tokens < 1) {
+        return false;
+    }
+    va_list token_list;
+    va_start(token_list, num_possible_tokens);
+    for (int i = 0; i < num_possible_tokens; i++) {
+        token_type expected = va_arg(token_list, token_type);
+        if ((current*)->value->type == expected) {
+            current* = (current*)->next;
+            return true;
+        }
+    }
+    return false;
 }
