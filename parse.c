@@ -8,10 +8,11 @@ void parse_list(Token_list* list) {
     print_tree(tree);
     if (parses_correctly) {
         printf("Parsed OK\n");
+        free_tree(tree);
     } else {
         fprintf(stderr, "ERROR - syntactically invalid NUCLEI program\n");
         free_tree(tree);
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
     }
 }
 
@@ -316,9 +317,93 @@ bool next_token_is(Token_node** current, int num_possible_tokens, ...) {
 }
 
 void print_tree(Syntax_tree* tree) {
-    
+    if (tree->program) {
+        print_tree_node(tree->program);
+    } else {
+        printf("EMPTY TREE");
+    }
+    printf("\n");
+}
+
+void print_tree_node(Tree_node* node) {
+    char* node_type = get_node_type(node);
+    printf("%s(", node_type);
+    if (node->child1) {
+        print_tree_node(node->child1);
+    }
+    printf(")(");
+    if (node->child2) {
+        print_tree_node(node->child2);
+    }
+    printf(")(");
+    if (node->child3) {
+        print_tree_node(node->child3);
+    }
+    printf(")");
+}
+
+char* get_node_type(Tree_node* node) {
+    switch (node->type) {
+        case PROG:
+            return "PROG";
+        case INSTRCTS:
+            return "INSTRCTS";
+        case INSTRCT:
+            return "INSTRCT";
+        case FUNC:
+            return "FUNC";
+        case RETFUNC:
+            return "RETFUNC";
+        case LISTFUNC:
+            return "LISTFUNC";
+        case INTFUNC:
+            return "INTFUNC";
+        case BOOLFUNC:
+            return "BOOLFUNC";
+        case IOFUNC:
+            return "IOFUNC";
+        case SET:
+            return "SET";
+        case PRINT:
+            return "PRINT";
+        case IF:
+            return "IF";
+        case LOOP:
+            return "LOOP";
+        case LIST:
+            return "LIST";
+        case VAR:
+            return "VAR";
+        case STRING:
+            return "STRING";
+        case LITERAL:
+            return "LITERAL";
+        case NIL:
+            return "NIL";
+        default:
+            return "null";
+    }
 }
 
 void free_tree(Syntax_tree* tree) {
-    
+    if (tree->program) {
+        free_node(tree->program);
+    }
+    free(tree);
+}
+
+void free_node(Tree_node* node) {
+    if (node->child1) {
+        free_node(node->child1);
+        node->child1 = NULL;
+    }
+    if (node->child2) {
+        free_node(node->child2);
+        node->child2 = NULL;
+    }
+    if (node->child3) {
+        free_node(node->child3);
+        node->child3 = NULL;
+    }
+    free(node);
 }

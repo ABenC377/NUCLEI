@@ -39,5 +39,8 @@ Tree_node* make_node(grammar_type type);
 Tree_node* parser_fails(bool* parses_correctly);
 bool next_token_is(Token_node** current, int num_possible_tokens, ...);
 void print_tree(Syntax_tree* tree);
+void print_tree_node(Tree_node* node);
+char* get_node_type(Tree_node* node);
 void free_tree(Syntax_tree* tree);
+void free_node(Tree_node* node);
 
