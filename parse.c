@@ -60,23 +60,15 @@ Tree_node* handle_INSTRCT(Token_node** current, bool* parses_correctly) {
 
 Tree_node* handle_FUNC(Token_node** current, bool* parses_correctly) {
     Tree_node* function = make_node(FUNC);
-    printf("Current token is "); // debugging
-    print_token(*current); // debugging
-    printf("\n"); // debugging
     if (is_RETFUNC(*current)) {
-        printf("entering RETFUNC\n"); // debugging
         function->child1 = handle_RETFUNC(current, parses_correctly);
     } else if (is_IOFUNC(*current)) {
-        printf("entering IOFUNC\n"); // debugging
         function->child1 = handle_IOFUNC(current, parses_correctly);
     } else if (is_IF(*current)) {
-        printf("entering IF\n"); // debugging
         function->child1 = handle_IF(current, parses_correctly);
     } else if (is_LOOP(*current)) {
-        printf("entering LOOP\n"); // debugging
         function->child1 = handle_LOOP(current, parses_correctly);
     } else {
-        printf("Not any type of FUNC\n"); // debugging
         return parser_fails(parses_correctly);
     }
     return function;
@@ -149,7 +141,7 @@ Tree_node* handle_IF(Token_node** current, bool* parses_correctly) {
         return parser_fails(parses_correctly);
     }
     if_node->child2 = handle_INSTRCTS(current, parses_correctly);
-    if (!next_token_is(current, 1, t_r_parenthesis)) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
     }
     if_node->child3 = handle_INSTRCTS(current, parses_correctly);
