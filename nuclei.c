@@ -22,10 +22,9 @@ void check_inputs(int argc, char* argv[]) {
 void parse_list(Token_list* list) {
     Syntax_tree* tree = (Syntax_tree*)allocate_space(1, sizeof(Syntax_tree));
     Token_node* current = list->start;
-    bool parses_correctly = true;
     Error_log* error_log = (Error_log*)allocate_space(1, sizeof(Error_log));
-    tree->program = descend_recursively(&current, &parses_correctly, error_log);
-    if (parses_correctly) {
+    tree->program = descend_recursively(&current, error_log);
+    if (error_log->num_errors == 0) {
         printf("Parsed OK\n");
     } else {
         printf("Not parsed correctly\n");
@@ -35,57 +34,57 @@ void parse_list(Token_list* list) {
     free(error_log);
 }
 
-Tree_node* descend_recursively(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* descend_recursively(Token_node** current, Error_log* error_log) {
     Tree_node* program = make_node(PROG);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before instructions in program\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before instructions in program\n");
     } else {
-        program->child1 = handle_INSTRCTS(current, parses_correctly, error_log);
+        program->child1 = handle_INSTRCTS(current, error_log);
     }
     return program;
 }
 
-Tree_node* handle_INSTRCTS(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_INSTRCTS(Token_node** current, Error_log* error_log) {
     if ((*current) == NULL) {
-        return parser_fails(parses_correctly, error_log, "Expecting further instructions\n");
+        return parser_fails(error_log, "Expecting further instructions\n");
     }
     if (next_token_is(current, 1, t_r_parenthesis)) {
         return NULL;
     } else {
         Tree_node* instructions = make_node(INSTRCTS);
-        instructions->child1 = handle_INSTRCT(current, parses_correctly, error_log);
+        instructions->child1 = handle_INSTRCT(current, error_log);
         if (instructions->child1->type == ERROR_NODE) {
             *current = (*current)->next;
         }
-        instructions->child2 = handle_INSTRCTS(current, parses_correctly, error_log);
+        instructions->child2 = handle_INSTRCTS(current, error_log);
         return instructions;
     }
 }
 
-Tree_node* handle_INSTRCT(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_INSTRCT(Token_node** current, Error_log* error_log) {
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Incorrectly formed instruction\n");
+        return parser_fails(error_log, "Incorrectly formed instruction\n");
     }
     Tree_node* instruction = make_node(INSTRCT);
-    instruction->child1 = handle_FUNC(current, parses_correctly, error_log);
+    instruction->child1 = handle_FUNC(current, error_log);
     if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting closing parenthesis after function in instruction\n");
+        return parser_fails(error_log, "Expecting closing parenthesis after function in instruction\n");
     }
     return instruction;
 }
 
-Tree_node* handle_FUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_FUNC(Token_node** current, Error_log* error_log) {
     Tree_node* function = make_node(FUNC);
     if (is_RETFUNC(*current)) {
-        function->child1 = handle_RETFUNC(current, parses_correctly, error_log);
+        function->child1 = handle_RETFUNC(current, error_log);
     } else if (is_IOFUNC(*current)) {
-        function->child1 = handle_IOFUNC(current, parses_correctly, error_log);
+        function->child1 = handle_IOFUNC(current, error_log);
     } else if (is_IF(*current)) {
-        function->child1 = handle_IF(current, parses_correctly, error_log);
+        function->child1 = handle_IF(current, error_log);
     } else if (is_LOOP(*current)) {
-        function->child1 = handle_LOOP(current, parses_correctly, error_log);
+        function->child1 = handle_LOOP(current, error_log);
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting function in intruction\n");
+        return parser_fails(error_log, "Expecting function in intruction\n");
     }
     return function;
 }
@@ -94,16 +93,16 @@ bool is_RETFUNC(Token_node* current) {
     return (is_LISTFUNC(current) || is_INTFUNC(current) || is_BOOLFUNC(current));
 }
 
-Tree_node* handle_RETFUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_RETFUNC(Token_node** current, Error_log* error_log) {
     Tree_node* ret_function = make_node(RETFUNC);
     if (is_LISTFUNC(*current)) {
-        ret_function->child1 = handle_LISTFUNC(current, parses_correctly, error_log);
+        ret_function->child1 = handle_LISTFUNC(current, error_log);
     } else if (is_INTFUNC(*current)) {
-        ret_function->child1 = handle_INTFUNC(current, parses_correctly, error_log);
+        ret_function->child1 = handle_INTFUNC(current, error_log);
     } else if (is_BOOLFUNC(*current)) {
-        ret_function->child1 = handle_BOOLFUNC(current, parses_correctly, error_log);
+        ret_function->child1 = handle_BOOLFUNC(current, error_log);
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting list, int, or bool function in return function\n");
+        return parser_fails(error_log, "Expecting list, int, or bool function in return function\n");
     }
     return ret_function;
 }
@@ -112,25 +111,25 @@ bool is_IOFUNC(Token_node* current) {
     return (current->value->type == t_set || current->value->type == t_print);
 }
 
-Tree_node* handle_IOFUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_IOFUNC(Token_node** current, Error_log* error_log) {
     Tree_node* io_function = make_node(IOFUNC);
     if ((*current)->value->type == t_set) {
-        io_function->child1 = handle_SET(current, parses_correctly, error_log);
+        io_function->child1 = handle_SET(current, error_log);
     } else if ((*current)->value->type == t_print) {
-        io_function->child1 = handle_PRINT(current, parses_correctly, error_log);
+        io_function->child1 = handle_PRINT(current, error_log);
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting 'SET' or 'PRINT' in I/O function\n");
+        return parser_fails(error_log, "Expecting 'SET' or 'PRINT' in I/O function\n");
     }
     return io_function;
 }
 
-Tree_node* handle_SET(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_SET(Token_node** current, Error_log* error_log) {
     Tree_node* set = make_node(SET);
     if (!next_token_is(current, 1, t_set)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'SET' in set statement\n");
+        return parser_fails(error_log, "Expecting 'SET' in set statement\n");
     } else {
-        set->child1 = handle_VAR(current, parses_correctly, error_log);
-        set->child2 = handle_LIST(current, parses_correctly, error_log);
+        set->child1 = handle_VAR(current, error_log);
+        set->child2 = handle_LIST(current, error_log);
         return set;
     }
 }
@@ -141,26 +140,26 @@ bool is_IF(Token_node* current) {
     return (current->value->type == t_if);
 }
 
-Tree_node* handle_IF(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_IF(Token_node** current, Error_log* error_log) {
     Tree_node* if_node = make_node(IF);
     if (!next_token_is(current, 1, t_if)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'IF' in if statement\n");
+        return parser_fails(error_log, "Expecting 'IF' in if statement\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before bool function in if statement\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before bool function in if statement\n");
     }
-    if_node->child1 = handle_BOOLFUNC(current, parses_correctly, error_log);
+    if_node->child1 = handle_BOOLFUNC(current, error_log);
     if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting closing parenthesis after bool function in if statement\n");
+        return parser_fails(error_log, "Expecting closing parenthesis after bool function in if statement\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before first instructions in if statement\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before first instructions in if statement\n");
     }
-    if_node->child2 = handle_INSTRCTS(current, parses_correctly, error_log);
+    if_node->child2 = handle_INSTRCTS(current, error_log);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before second instructions in if statement\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before second instructions in if statement\n");
     }
-    if_node->child3 = handle_INSTRCTS(current, parses_correctly, error_log);
+    if_node->child3 = handle_INSTRCTS(current, error_log);
     return if_node;
 }
 
@@ -168,22 +167,22 @@ bool is_LOOP(Token_node* current) {
     return (current->value->type == t_while);
 }
 
-Tree_node* handle_LOOP(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_LOOP(Token_node** current, Error_log* error_log) {
     Tree_node* loop = make_node(LOOP);
     if (!next_token_is(current, 1, t_while)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'WHILE' in loop\n");
+        return parser_fails(error_log, "Expecting 'WHILE' in loop\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before bool function in loop\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before bool function in loop\n");
     }
-    loop->child1 = handle_BOOLFUNC(current, parses_correctly, error_log);
+    loop->child1 = handle_BOOLFUNC(current, error_log);
     if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting closing parenthesis after bool function in loop\n");
+        return parser_fails(error_log, "Expecting closing parenthesis after bool function in loop\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before instructions within loop\n");
+        return parser_fails(error_log, "Expecting opening parenthesis before instructions within loop\n");
     }
-    loop->child2 = handle_INSTRCTS(current, parses_correctly, error_log);
+    loop->child2 = handle_INSTRCTS(current, error_log);
     return loop;
 }
 
@@ -192,17 +191,17 @@ bool is_LISTFUNC(Token_node* current) {
     return (type == t_CAR || type == t_CDR || type == t_CONS);
 }
 
-Tree_node* handle_LISTFUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_LISTFUNC(Token_node** current, Error_log* error_log) {
     Tree_node* list_function = make_node(LISTFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 3, t_CAR, t_CDR, t_CONS)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'CAR', 'CDR', or 'CONS' in list function");
+        return parser_fails(error_log, "Expecting 'CAR', 'CDR', or 'CONS' in list function");
     } else {
         list_function->func_type = type;
     }
-    list_function->child1 = handle_LIST(current, parses_correctly, error_log);
+    list_function->child1 = handle_LIST(current, error_log);
     if (type == t_CONS) {
-        list_function->child2 = handle_LIST(current, parses_correctly, error_log);
+        list_function->child2 = handle_LIST(current, error_log);
     }
     return list_function;
 }
@@ -213,17 +212,17 @@ bool is_INTFUNC(Token_node* current) {
     return (type == t_plus || type == t_length);
 }
 
-Tree_node* handle_INTFUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_INTFUNC(Token_node** current, Error_log* error_log) {
     Tree_node* int_function = make_node(INTFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 2, t_plus, t_length)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'PLUS' or 'LENGTH' in unteger function\n");
+        return parser_fails(error_log, "Expecting 'PLUS' or 'LENGTH' in unteger function\n");
     } else {
         int_function->func_type = type;
-        int_function->child1 = handle_LIST(current, parses_correctly, error_log);
+        int_function->child1 = handle_LIST(current, error_log);
     }
     if (type == t_plus) {
-        int_function->child2 = handle_LIST(current, parses_correctly, error_log);
+        int_function->child2 = handle_LIST(current, error_log);
     }
     return int_function;
 }
@@ -233,73 +232,79 @@ bool is_BOOLFUNC(Token_node* current) {
     return (type == t_less || type == t_greater || type == t_equal);
 }
 
-Tree_node* handle_BOOLFUNC(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_BOOLFUNC(Token_node** current, Error_log* error_log) {
     Tree_node* bool_function = make_node(BOOLFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 3, t_less, t_greater, t_equal)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'LESS', 'GREATER', or 'EQUAL' in bool function\n");
+        return parser_fails(error_log, "Expecting 'LESS', 'GREATER', or 'EQUAL' in bool function\n");
     } else {
         bool_function->func_type = type;
-        bool_function->child1 = handle_LIST(current, parses_correctly, error_log);
-        bool_function->child2 = handle_LIST(current, parses_correctly, error_log);
+        bool_function->child1 = handle_LIST(current, error_log);
+        bool_function->child2 = handle_LIST(current, error_log);
     }
     return bool_function;
 }
 
-Tree_node* handle_LIST(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_LIST(Token_node** current, Error_log* error_log) {
     Tree_node* list = make_node(LIST);
     token_type type = (*current)->value->type;
     if (type == t_variable) {
-        list->child1 = handle_VAR(current, parses_correctly, error_log);
+        list->child1 = handle_VAR(current, error_log);
     } else if (type == t_literal) {
-        list->child1 = handle_LITERAL(current, parses_correctly, error_log);
+        list->child1 = handle_LITERAL(current, error_log);
     } else if (type == t_nil) {
-        list->child1 = handle_NIL(current, parses_correctly, error_log);
+        list->child1 = handle_NIL(current, error_log);
     } else if (next_token_is(current, 1, t_l_parenthesis)) {
-        list->child1 = handle_RETFUNC(current, parses_correctly, error_log);
+        list->child1 = handle_RETFUNC(current, error_log);
         if (!next_token_is(current, 1, t_r_parenthesis)) {
-            return parser_fails(parses_correctly, error_log, "Expecting closing parenthesis after return function\n");
+            return parser_fails(error_log, "Expecting closing parenthesis after return function\n");
         }
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting variable, literal, 'nil' or return function in list\n");
+        return parser_fails(error_log, "Expecting variable, literal, 'nil' or return function in list\n");
     }
     return list;
 }
 
-Tree_node* handle_VAR(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_VAR(Token_node** current, Error_log* error_log) {
+    if ((*current)->value->type != t_variable) {
+        parser_fails(error_log, "Expecting a variable\n");
+    }
     Tree_node* var = make_node(VAR);
     var->var_name = (*current)->value->var_name;
     *current = (*current)->next;
     return var;
 }
 
-Tree_node* handle_LITERAL(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_LITERAL(Token_node** current, Error_log* error_log) {
     if ((*current)->value->type == t_literal) {
         Tree_node* literal = make_node(LITERAL);
         literal->string_value = (*current)->value->lexeme;
         *current = (*current)->next;
         return literal;
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting literal\n");
+        return parser_fails(error_log, "Expecting literal\n");
     }
     
 }
 
-Tree_node* handle_NIL(Token_node** current, bool* parses_correctly, Error_log* error_log)  {
+Tree_node* handle_NIL(Token_node** current, Error_log* error_log)  {
+    if ((*current)->value->type != t_nil) {
+        parser_fails(error_log, "Expecting 'NIL'\n");
+    }
     Tree_node* nil = make_node(NIL);
     *current = (*current)->next;
     return nil;
 }
 
-Tree_node* handle_PRINT(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_PRINT(Token_node** current, Error_log* error_log) {
     Tree_node* print = make_node(PRINT);
     if (!next_token_is(current, 1, t_print)) {
-        return parser_fails(parses_correctly, error_log, "Expecting 'PRINT' in print statement\n");
+        return parser_fails(error_log, "Expecting 'PRINT' in print statement\n");
     } 
     if ((*current)->value->type == t_string) {
-        print->child1 = handle_STRING(current, parses_correctly, error_log);
+        print->child1 = handle_STRING(current, error_log);
     } else if (is_LIST(*current)) {
-        print->child1 = handle_LIST(current, parses_correctly, error_log);
+        print->child1 = handle_LIST(current, error_log);
     }
     return print;
 }
@@ -309,14 +314,14 @@ bool is_LIST(Token_node* current) {
     return (type == t_variable || type == t_literal || type == t_nil || type == t_l_parenthesis);
 }
 
-Tree_node* handle_STRING(Token_node** current, bool* parses_correctly, Error_log* error_log) {
+Tree_node* handle_STRING(Token_node** current, Error_log* error_log) {
     if ((*current)->value->type == t_string) {
         Tree_node* string = make_node(STRING);
         string->string_value = (*current)->value->lexeme;
         *current = (*current)->next;
         return string;
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting string\n");
+        return parser_fails(error_log, "Expecting string\n");
     }
 }
 
@@ -326,8 +331,7 @@ Tree_node* make_node(grammar_type type) {
     return new_node;
 }
 
-Tree_node* parser_fails(bool* parses_correctly, Error_log* error_log, char* error_message) {
-    *parses_correctly = false;
+Tree_node* parser_fails(Error_log* error_log, char* error_message) {
     add_error(error_log, error_message);
     Tree_node* error_node = (Tree_node*)allocate_space(1, sizeof(Tree_node));
     error_node->type = ERROR_NODE;
@@ -462,7 +466,7 @@ void print_log(Error_log* log) {
         fprintf(stderr, "ERROR LOG:\n");
     }
     for (int i = 0; i < log->num_errors; i++) {
-        fprintf(stderr, "Er%i - ", i);
+        fprintf(stderr, "Er%i - ", i + 1);
         fputs(log->errors[i], stderr);
     }
     if (log->overflow) {
