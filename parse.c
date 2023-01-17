@@ -3,22 +3,25 @@
 void parse_list(Token_list* list) {
     Syntax_tree* tree = (Syntax_tree*)allocate_space(1, sizeof(Syntax_tree));
     Token_node* current = list->start;
+    // printf("First token being considered is VVV\n"); // debugging
+    // print_token(current); // debugging
+    // printf("\n"); // debugging
     bool parses_correctly = true;
     tree->program = descend_recursively(&current, &parses_correctly);
-    print_tree(tree);
+    print_tree(tree); // debugging
     if (parses_correctly) {
         printf("Parsed OK\n");
         free_tree(tree);
     } else {
-        fprintf(stderr, "ERROR - syntactically invalid NUCLEI program\n");
+        fprintf(stderr, "PARSING ERROR - syntactically invalid NUCLEI program\n");
         free_tree(tree);
-        // exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 }
 
 Tree_node* descend_recursively(Token_node** current, bool* parses_correctly) {
     Tree_node* program = make_node(PROG);
-    if (next_token_is(current, 1, t_l_parenthesis)) {
+    if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(parses_correctly);
     } else {
         program->child1 = handle_INSTRCTS(current, parses_correctly);
@@ -27,6 +30,12 @@ Tree_node* descend_recursively(Token_node** current, bool* parses_correctly) {
 }
 
 Tree_node* handle_INSTRCTS(Token_node** current, bool* parses_correctly) {
+    if ((*current) == NULL) {
+        return parser_fails(parses_correctly);
+    }
+    // printf("In INSTRCTS.  Considering token: "); // debugging
+    // print_token((*current)); // debugging
+    // printf("\n"); // debugging
     if (next_token_is(current, 1, t_r_parenthesis)) {
         return NULL;
     } else {
@@ -51,15 +60,23 @@ Tree_node* handle_INSTRCT(Token_node** current, bool* parses_correctly) {
 
 Tree_node* handle_FUNC(Token_node** current, bool* parses_correctly) {
     Tree_node* function = make_node(FUNC);
+    printf("Current token is "); // debugging
+    print_token(*current); // debugging
+    printf("\n"); // debugging
     if (is_RETFUNC(*current)) {
+        printf("entering RETFUNC\n"); // debugging
         function->child1 = handle_RETFUNC(current, parses_correctly);
     } else if (is_IOFUNC(*current)) {
+        printf("entering IOFUNC\n"); // debugging
         function->child1 = handle_IOFUNC(current, parses_correctly);
-    } else if (is_IF(*current) == true) {
+    } else if (is_IF(*current)) {
+        printf("entering IF\n"); // debugging
         function->child1 = handle_IF(current, parses_correctly);
-    } else if (is_LOOP(*current) == true) {
+    } else if (is_LOOP(*current)) {
+        printf("entering LOOP\n"); // debugging
         function->child1 = handle_LOOP(current, parses_correctly);
     } else {
+        printf("Not any type of FUNC\n"); // debugging
         return parser_fails(parses_correctly);
     }
     return function;
@@ -111,7 +128,9 @@ Tree_node* handle_SET(Token_node** current, bool* parses_correctly) {
 }
 
 bool is_IF(Token_node* current) {
-    return (current->value->type = t_if);
+    // print_token(current); // debugging
+    // printf(" <- this is the current token\n"); // debugging
+    return (current->value->type == t_if);
 }
 
 Tree_node* handle_IF(Token_node** current, bool* parses_correctly) {
@@ -242,6 +261,7 @@ Tree_node* handle_LIST(Token_node** current, bool* parses_correctly) {
 Tree_node* handle_VAR(Token_node** current, bool* parses_correctly) {
     Tree_node* var = make_node(VAR);
     var->var_name = (*current)->value->var_name;
+    *current = (*current)->next;
     return var;
 }
 
@@ -249,6 +269,7 @@ Tree_node* handle_LITERAL(Token_node** current, bool* parses_correctly)  {
     if ((*current)->value->type == t_literal) {
         Tree_node* literal = make_node(LITERAL);
         literal->string_value = (*current)->value->lexeme;
+        *current = (*current)->next;
         return literal;
     } else {
         return parser_fails(parses_correctly);
@@ -258,6 +279,7 @@ Tree_node* handle_LITERAL(Token_node** current, bool* parses_correctly)  {
 
 Tree_node* handle_NIL(Token_node** current, bool* parses_correctly)  {
     Tree_node* nil = make_node(NIL);
+    *current = (*current)->next;
     return nil;
 }
 
@@ -266,10 +288,10 @@ Tree_node* handle_PRINT(Token_node** current, bool* parses_correctly) {
     if (!next_token_is(current, 1, t_print)) {
         return parser_fails(parses_correctly);
     } 
-    if (is_LIST(*current)) {
-        print->child1 = handle_LIST(current, parses_correctly);
-    } else if ((*current)->value->type == t_string) {
+    if ((*current)->value->type == t_string) {
         print->child1 = handle_STRING(current, parses_correctly);
+    } else if (is_LIST(*current)) {
+        print->child1 = handle_LIST(current, parses_correctly);
     }
     return print;
 }
@@ -283,6 +305,7 @@ Tree_node* handle_STRING(Token_node** current, bool* parses_correctly) {
     if ((*current)->value->type == t_string) {
         Tree_node* string = make_node(STRING);
         string->string_value = (*current)->value->lexeme;
+        *current = (*current)->next;
         return string;
     } else {
         return parser_fails(parses_correctly);
@@ -301,7 +324,7 @@ Tree_node* parser_fails(bool* parses_correctly) {
 }
 
 bool next_token_is(Token_node** current, int num_possible_tokens, ...) {
-    if (num_possible_tokens < 1) {
+    if ((num_possible_tokens < 1) || !(*current)) {
         return false;
     }
     va_list token_list;
@@ -327,15 +350,15 @@ void print_tree(Syntax_tree* tree) {
 
 void print_tree_node(Tree_node* node) {
     char* node_type = get_node_type(node);
-    printf("%s(", node_type);
+    printf("(%s", node_type);
     if (node->child1) {
         print_tree_node(node->child1);
+    } else {
+        printf("()"); 
     }
-    printf(")(");
     if (node->child2) {
         print_tree_node(node->child2);
     }
-    printf(")(");
     if (node->child3) {
         print_tree_node(node->child3);
     }

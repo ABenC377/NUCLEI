@@ -430,64 +430,66 @@ void print_tokens(Token_list* tokens) {
 }
 
 void print_token(Token_node* node) {
-    switch (node->value->type) {
-        case t_literal:
-            printf("<LITERAL>");
-            break;
-        case t_string:
-            printf("<STRING>");
-            break;
-        case t_variable:
-            printf("<VARIABLE>");
-            break;
-        case t_nil:
-            printf("NIL");
-            break;
-        case t_while:
-            printf("WHILE");
-            break;
-        case t_if:
-            printf("IF");
-            break;
-        case t_print:
-            printf("PRINT");
-            break;
-        case t_set:
-            printf("SET");
-            break;
-        case t_equal:
-            printf("EQUAL");
-            break;
-        case t_greater:
-            printf("GREATER");
-            break;
-        case t_less:
-            printf("LESS");
-            break;
-        case t_length:
-            printf("LENGTH");
-            break;
-        case t_plus:
-            printf("PLUS");
-            break;
-        case t_CONS:
-            printf("CONS");
-            break;
-        case t_CDR:
-            printf("CDR");
-            break;
-        case t_CAR:
-            printf("CAR");
-            break;
-        case t_l_parenthesis:
-            printf("(");
-            break;
-        case t_r_parenthesis:
-            printf(")");
-            break;
-        case t_invalid:
-            printf("INVALID");
-            break;
+    if (node) {
+        switch (node->value->type) {
+            case t_literal:
+                printf("<LITERAL>");
+                break;
+            case t_string:
+                printf("<STRING>");
+                break;
+            case t_variable:
+                printf("<VARIABLE>");
+                break;
+            case t_nil:
+                printf("NIL");
+                break;
+            case t_while:
+                printf("WHILE");
+                break;
+            case t_if:
+                printf("IF");
+                break;
+            case t_print:
+                printf("PRINT");
+                break;
+            case t_set:
+                printf("SET");
+                break;
+            case t_equal:
+                printf("EQUAL");
+                break;
+            case t_greater:
+                printf("GREATER");
+                break;
+            case t_less:
+                printf("LESS");
+                break;
+            case t_length:
+                printf("LENGTH");
+                break;
+            case t_plus:
+                printf("PLUS");
+                break;
+            case t_CONS:
+                printf("CONS");
+                break;
+            case t_CDR:
+                printf("CDR");
+                break;
+            case t_CAR:
+                printf("CAR");
+                break;
+            case t_l_parenthesis:
+                printf("(");
+                break;
+            case t_r_parenthesis:
+                printf(")");
+                break;
+            case t_invalid:
+                printf("INVALID");
+                break;
+        }
     }
 }
 
