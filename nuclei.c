@@ -470,7 +470,7 @@ void print_log(Error_log* log) {
         fputs(log->errors[i], stderr);
     }
     if (log->overflow) {
-        fprintf(stderr, "More than 20 parsing errors.  Not printing any more\n");
+        fprintf(stderr, "More than 20 parsing errors.  Not printing any more.\n");
     }
 }
 
