@@ -54,6 +54,9 @@ Tree_node* handle_INSTRCTS(Token_node** current, bool* parses_correctly, Error_l
     } else {
         Tree_node* instructions = make_node(INSTRCTS);
         instructions->child1 = handle_INSTRCT(current, parses_correctly, error_log);
+        if (instructions->child1->type == ERROR_NODE) {
+            *current = (*current)->next;
+        }
         instructions->child2 = handle_INSTRCTS(current, parses_correctly, error_log);
         return instructions;
     }
@@ -61,7 +64,7 @@ Tree_node* handle_INSTRCTS(Token_node** current, bool* parses_correctly, Error_l
 
 Tree_node* handle_INSTRCT(Token_node** current, bool* parses_correctly, Error_log* error_log) {
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(parses_correctly, error_log, "Expecting opening parenthesis before function in instruction\n");
+        return parser_fails(parses_correctly, error_log, "Incorrectly formed instruction\n");
     }
     Tree_node* instruction = make_node(INSTRCT);
     instruction->child1 = handle_FUNC(current, parses_correctly, error_log);
@@ -82,7 +85,7 @@ Tree_node* handle_FUNC(Token_node** current, bool* parses_correctly, Error_log* 
     } else if (is_LOOP(*current)) {
         function->child1 = handle_LOOP(current, parses_correctly, error_log);
     } else {
-        return parser_fails(parses_correctly, error_log, "Expecting return or I/O function, 'IF', or 'LOOP' in function\n");
+        return parser_fails(parses_correctly, error_log, "Expecting function in intruction\n");
     }
     return function;
 }
@@ -411,6 +414,8 @@ char* get_node_type(Tree_node* node) {
             return "LITERAL";
         case NIL:
             return "NIL";
+        case ERROR_NODE:
+            return "ERROR";
         default:
             return "null";
     }
@@ -453,9 +458,12 @@ void* allocate_space(int num, int size) {
 }
 
 void print_log(Error_log* log) {
+    if (log->num_errors > 0) {
+        fprintf(stderr, "ERROR LOG:\n");
+    }
     for (int i = 0; i < log->num_errors; i++) {
+        fprintf(stderr, "Er%i - ", i);
         fputs(log->errors[i], stderr);
-        fprintf(stderr, "\n");
     }
     if (log->overflow) {
         fprintf(stderr, "More than 20 parsing errors.  Not printing any more\n");
