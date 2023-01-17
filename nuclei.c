@@ -18,7 +18,6 @@ void check_inputs(int argc, char* argv[]) {
     }
     (void)argv; // To get rid of warning for now
 }
-#include "nuclei.h"
 
 void parse_list(Token_list* list) {
     Syntax_tree* tree = (Syntax_tree*)allocate_space(1, sizeof(Syntax_tree));
