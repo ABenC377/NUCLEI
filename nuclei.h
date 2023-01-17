@@ -1,3 +1,5 @@
+#pragma once
+
 // #include "specific.h"
 #include "./lexical_parser.h"
 #include "./parse.h"

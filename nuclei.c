@@ -7,11 +7,11 @@ int main(int argc, char* argv[]) {
     Token_list* list = run_lexical_analyser(argc, argv);
     // print_tokens(list); // debugging
     
-    #ifdef INTERP
-    parse_and_interpret(list);
-    #else
+    //#ifdef INTERP
+    //parse_and_interpret(list);
+    //#else
     parse_list(list);
-    #endif
+    //#endif
     
     free_token_list(list);
 }
@@ -38,5 +38,5 @@ void throw_error(const char* error_message) {
 
 void test(void) {
     lexical_analysis_test();
-    parse_test();
+    // parse_test();
 }

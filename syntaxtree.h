@@ -1,6 +1,6 @@
 #pragma once
 
-#include tokentype.h
+#include "tokentype.h"
 
 typedef enum {
     PROG,
@@ -21,7 +21,7 @@ typedef enum {
     STRING,
     LITERAL,
     NIL
-} grammar_type
+} grammar_type;
 
 typedef struct Tree_node {
     grammar_type type;
