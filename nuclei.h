@@ -12,6 +12,7 @@
 #include <stdarg.h>
 
 #define MAXERR 20
+#define NUMVARS 26
 
 typedef enum {
     PROG,
@@ -53,7 +54,13 @@ typedef struct {
     int num_errors;
     char* errors[MAXERR];
     bool overflow;
+    char* variables[MAXVARS];
 } Prog_log;
+
+typedef struct Lisp {
+    struct Lisp* car; // points to this element of the list
+    struct Lisp* cdr; // points to the remainder of the list
+} Lisp;
 
 void check_inputs(int argc, char* argv[]);
 void parse_list(Token_list* list);
