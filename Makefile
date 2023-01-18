@@ -14,7 +14,7 @@ PROD    := $(CFLAGS) -O3
 all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind
 	
 parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
-	$(CC) nuclie.c lexical_parser.c -o nuclei_p $(PROD)
+	$(CC) nuclei.c lexical_parser.c -o nuclei_p $(PROD)
 
 parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_pd $(DEBUG)
@@ -23,7 +23,7 @@ parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_pv $(VFLAGS)	
 	
 interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
-	$(CC) nuclie.c lexical_parser.c -o nuclei_i -DINTERP $(PROD)
+	$(CC) nuclei.c lexical_parser.c -o nuclei_i -DINTERP $(PROD)
 
 interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_id -DINTERP $(DEBUG)
@@ -31,7 +31,7 @@ interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_iv -DINTERP $(VFLAGS)	
 
-run_debug: nuclei_pd
+run: nuclei_pd
 	./nuclei_pd test_code/basic_print.ncl
 	./nuclei_pd test_code/demo1.ncl
 	./nuclei_pd test_code/demo2.ncl
