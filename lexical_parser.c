@@ -32,12 +32,14 @@ Token_list* get_tokens_from_file(FILE* fp) {
     Token_list* tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
     char c = (char)fgetc(fp);
-    bool prog_started = false;
+    bool in_comment = false;
     while (c != EOF) {
-        if (c == '(') {
-            prog_started = true;
+        if (c == '#') {
+            in_comment = true;
+        } else if (c == '\n') {
+            in_comment = false;
         }
-        if (prog_started) {
+        if (!in_comment) {
             update_tokens(tokens, automata, c);
         }
         c = (char)fgetc(fp);
