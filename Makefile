@@ -13,22 +13,22 @@ PROD    := $(CFLAGS) -O3
 
 all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind
 	
-parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_p $(PROD)
 
-parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h 
 	$(CC) nuclei.c lexical_parser.c -o nuclei_pd $(DEBUG)
 
-parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h 
 	$(CC) nuclei.c lexical_parser.c -o nuclei_pv $(VFLAGS)	
 	
-interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h
 	$(CC) nuclei.c lexical_parser.c -o nuclei_i -DINTERP $(PROD)
 
-interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h 
 	$(CC) nuclei.c lexical_parser.c -o nuclei_id -DINTERP $(DEBUG)
 
-interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h 
 	$(CC) nuclei.c lexical_parser.c -o nuclei_iv -DINTERP $(VFLAGS)	
 
 run: nuclei_pd

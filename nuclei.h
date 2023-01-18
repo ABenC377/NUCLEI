@@ -2,7 +2,6 @@
 
 // #include "specific.h"
 #include "./lexical_parser.h"
-#include "./tokentype.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -54,7 +53,7 @@ typedef struct {
     int num_errors;
     char* errors[MAXERR];
     bool overflow;
-    char* variables[MAXVARS];
+    char* variables[NUMVARS];
 } Prog_log;
 
 typedef struct Lisp {
