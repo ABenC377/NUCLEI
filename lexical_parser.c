@@ -32,8 +32,14 @@ Token_list* get_tokens_from_file(FILE* fp) {
     Token_list* tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
     char c = (char)fgetc(fp);
+    bool prog_started = false;
     while (c != EOF) {
-        update_tokens(tokens, automata, c);
+        if (c == '(') {
+            prog_started = true;
+        }
+        if (prog_started) {
+            update_tokens(tokens, automata, c);
+        }
         c = (char)fgetc(fp);
     }
     free(automata);

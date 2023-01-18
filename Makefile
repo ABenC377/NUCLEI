@@ -6,26 +6,54 @@
 # In this way ./parse & ./interp can both be built from the same source file.
 
 CC      := gcc
-DEBUG   := -g3
-CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -fsanitize=undefined -fsanitize=address
+CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 
+DEBUG   := $(CFLAGS) -g3 -fsanitize=undefined -fsanitize=address
+VFLAGS  := $(CFLAGS) -g3
+PROD    := $(CFLAGS) -O3
 
-
-debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
-	$(CC) nuclei.c lexical_parser.c -o nuclei $(CFLAGS) $(DEBUG)
-
-run: nuclei
-	./nuclei test_code/basic_print.ncl
-	./nuclei test_code/demo1.ncl
-	./nuclei test_code/demo2.ncl
-	./nuclei test_code/demo3.ncl
-	./nuclei test_code/fibonacci.ncl
-	./nuclei test_code/inf_loop.ncl
-	./nuclei test_code/parse_fail.ncl
-	./nuclei test_code/parse_pass_interp_fail.ncl
-	./nuclei test_code/print_set.ncl
-	./nuclei test_code/simple_loop.ncl
-	./nuclei test_code/test.ncl
-	./nuclei test_code/triv.ncl
+all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind
 	
-run_simple: nuclei
-	./nuclei test_code/demo1.ncl
+parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclie.c lexical_parser.c -o nuclei_p $(PROD)
+
+parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclei.c lexical_parser.c -o nuclei_pd $(DEBUG)
+
+parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclei.c lexical_parser.c -o nuclei_pv $(VFLAGS)	
+	
+interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclie.c lexical_parser.c -o nuclei_i -DINTERP $(PROD)
+
+interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclei.c lexical_parser.c -o nuclei_id -DINTERP $(DEBUG)
+
+interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h tokentype.h
+	$(CC) nuclei.c lexical_parser.c -o nuclei_iv -DINTERP $(VFLAGS)	
+
+run_debug: nuclei_pd
+	./nuclei_pd test_code/basic_print.ncl
+	./nuclei_pd test_code/demo1.ncl
+	./nuclei_pd test_code/demo2.ncl
+	./nuclei_pd test_code/demo3.ncl
+	./nuclei_pd test_code/fibonacci.ncl
+	./nuclei_pd test_code/inf_loop.ncl
+	./nuclei_pd test_code/parse_fail.ncl
+	./nuclei_pd test_code/parse_pass_interp_fail.ncl
+	./nuclei_pd test_code/print_set.ncl
+	./nuclei_pd test_code/simple_loop.ncl
+	./nuclei_pd test_code/test.ncl
+	./nuclei_pd test_code/triv.ncl
+	./nuclei_id test_code/basic_print.ncl
+	./nuclei_id test_code/demo1.ncl
+	./nuclei_id test_code/demo2.ncl
+	./nuclei_id test_code/demo3.ncl
+	./nuclei_id test_code/fibonacci.ncl
+	./nuclei_id test_code/inf_loop.ncl
+	./nuclei_id test_code/parse_fail.ncl
+	./nuclei_id test_code/parse_pass_interp_fail.ncl
+	./nuclei_id test_code/print_set.ncl
+	./nuclei_id test_code/simple_loop.ncl
+	./nuclei_id test_code/test.ncl
+	./nuclei_id test_code/triv.ncl
+	
