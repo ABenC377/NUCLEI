@@ -30,6 +30,15 @@ interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
 
 interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
 	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_iv -DINTERP $(VFLAGS)	
+	
+extension: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_i -DINTERP -DEXT $(PROD)
+
+extension_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_id -DINTERP -DEXT $(DEBUG)
+
+extension_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
+	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_iv -DINTERP -DEXT $(VFLAGS)	
 
 run: nuclei_pd
 	./nuclei_pd test_code/basic_print.ncl

@@ -13,6 +13,7 @@
 
 #define MAXERR 20
 #define NUMVARS 26
+#define MAXSTR 1000
 
 typedef enum {
     PROG,
@@ -41,6 +42,7 @@ typedef struct Tree_node {
     char var_name;
     char* string_value;
     token_type func_type;
+    Lisp* list;
     struct Tree_node* child1;
     struct Tree_node* child2;
     struct Tree_node* child3;
@@ -54,7 +56,8 @@ typedef struct {
     int num_errors;
     char* errors[MAXERR];
     bool overflow;
-    char* variables[NUMVARS];
+    Lisp* variables[NUMVARS];
+    bool executing;
 } Prog_log;
 
 void check_inputs(int argc, char* argv[]);

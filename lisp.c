@@ -192,8 +192,8 @@ l   } else {
         add_node_to_string(l->cdr, str, index);
     }
 }
-l
-loid add_integer_to_string(long integer, char* str, int* index) {
+
+void add_integer_to_string(long integer, char* str, int* index) {
     long remainder = get_absolute(integer, str, index);
     int remaining_digits = get_log_ten(remainder);
     while (remaining_digits >= 0) {

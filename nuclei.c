@@ -23,6 +23,7 @@ void parse_list(Token_list* list) {
     Syntax_tree* tree = (Syntax_tree*)allocate_space(1, sizeof(Syntax_tree));
     Token_node* current = list->start;
     Prog_log* program_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
+    program_log->executing = true;
     tree->program = descend_recursively(&current, program_log);
     if (program_log->num_errors == 0) {
         printf("Parsed OK\n");
@@ -250,12 +251,24 @@ Tree_node* handle_LIST(Token_node** current, Prog_log* program_log) {
     token_type type = (*current)->value->type;
     if (type == t_variable) {
         list->child1 = handle_VAR(current, program_log);
+        #ifdef INTERP
+            list->list = program_log->variables[child1->var_name - 'A'];
+        #endif
     } else if (type == t_literal) {
         list->child1 = handle_LITERAL(current, program_log);
+        #ifdef
+            list->list = list->child1->list;
+        #endif
     } else if (type == t_nil) {
         list->child1 = handle_NIL(current, program_log);
+        #ifdef
+            list->list = NULL;
+        #endif
     } else if (next_token_is(current, 1, t_l_parenthesis)) {
         list->child1 = handle_RETFUNC(current, program_log);
+        #ifdef
+            list->list = list->child1->list;
+        #endif
         if (!next_token_is(current, 1, t_r_parenthesis)) {
             return parser_fails(program_log, "Expecting closing parenthesis after return function\n");
         }
@@ -271,6 +284,13 @@ Tree_node* handle_VAR(Token_node** current, Prog_log* program_log) {
     }
     Tree_node* var = make_node(VAR);
     var->var_name = (*current)->value->var_name;
+    #ifdef EXT
+        if (program_log->variables[var->var_name - 'A'] == NULL) {
+            var->type = ERROR_NODE;
+            program_log->errors[program_log->num_errors] = "INTERPRETER ERROR: uninitialised variable used\n";
+            (program_log->num_errors)++;
+        }
+    #endif
     *current = (*current)->next;
     return var;
 }
@@ -278,7 +298,13 @@ Tree_node* handle_VAR(Token_node** current, Prog_log* program_log) {
 Tree_node* handle_LITERAL(Token_node** current, Prog_log* program_log) {
     if ((*current)->value->type == t_literal) {
         Tree_node* literal = make_node(LITERAL);
-        literal->string_value = (*current)->value->lexeme;
+        #ifdef INTERP
+            if (is_invalid((*current)->value->lexeme)) {
+                literal->type = ERROR_NODE;
+            } else {
+                literal->list = lisp_from_string((*current)->value->lexeme);
+            }
+        #endif
         *current = (*current)->next;
         return literal;
     } else {
@@ -303,8 +329,20 @@ Tree_node* handle_PRINT(Token_node** current, Prog_log* program_log) {
     } 
     if ((*current)->value->type == t_string) {
         print->child1 = handle_STRING(current, program_log);
+        #ifdef INTERP
+            if (program_log->executing) {
+                fprintf("%s", (*current)->value->lexeme);
+            }
+        #endif
     } else if (is_LIST(*current)) {
         print->child1 = handle_LIST(current, program_log);
+        #ifdef INTERP
+            if (program_log->executing) {
+                char* string_to_print[MAXSTR];
+                lisp_to_string(print->child1->list);
+            }
+            fprintf("%s", string_to_print);
+        #endif
     }
     return print;
 }
@@ -317,7 +355,9 @@ bool is_LIST(Token_node* current) {
 Tree_node* handle_STRING(Token_node** current, Prog_log* program_log) {
     if ((*current)->value->type == t_string) {
         Tree_node* string = make_node(STRING);
-        string->string_value = (*current)->value->lexeme;
+        #ifdef INTERP
+            string->string_value = (*current)->value->lexeme;
+        #endif
         *current = (*current)->next;
         return string;
     } else {
