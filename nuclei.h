@@ -2,6 +2,7 @@
 
 // #include "specific.h"
 #include "./lexical_parser.h"
+#include "./lisp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -55,11 +56,6 @@ typedef struct {
     bool overflow;
     char* variables[NUMVARS];
 } Prog_log;
-
-typedef struct Lisp {
-    struct Lisp* car; // points to this element of the list
-    struct Lisp* cdr; // points to the remainder of the list
-} Lisp;
 
 void check_inputs(int argc, char* argv[]);
 void parse_list(Token_list* list);

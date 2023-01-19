@@ -1,64 +1,52 @@
 #pragma once
 
-typedef struct lisp lisp;
-
-typedef int atomtype;
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdarg.h>
-#include <stdbool.h>
+#include <ctype.h>
 
-// Returns element 'a' - this is not a list, and
-// by itself would be printed as e.g. "3", and not "(3)"
-lisp* lisp_atom(const atomtype a);
+#define TESTSTRLEN 1000
+#define LISPIMPL "linked"
+#define EMPTY 0
+#define STREND '\0'
+#define ISEVEN(val) ((val & 1) == 0)
 
-// Returns a list containing the car as 'l1'
-// and the cdr as 'l2'- data in 'l1' and 'l2' are reused,
-// and not copied. Either 'l1' and/or 'l2' can be NULL
-lisp* lisp_cons(const lisp* l1,  const lisp* l2);
+typedef struct Lisp {
+    struct Lisp* car; // points to this element of the list
+    struct Lisp* cdr; // points to the remainder of the list
+    int value;
+} Lisp; 
 
-// Returns the car (1st) component of the list 'l'.
-// Does not copy any data.
-lisp* lisp_car(const lisp* l);
+void* allocate_space(unsigned int num, unsigned int size);
+void throw_error(const char* error_message);
+void set_string_to_empty(char* str);
+void add_nodeTo_string(const Lisp* l, char* str, int* index);
+void consider_adjacent_nodes(const Lisp* l, char* str, int* index);
+void add_integer_to_string(long integer, char* str, int* index);
+long getAbsolute(long integer, char* str, int* index);
+long get_power_of_ten(int power);
+int get_log_ten(long n);
+int get_value_trom_string(const char* str, int* index);
+bool is_positive(const char* str, int* index);
+void add_new_sub_lisp(const char* str, int* index, Lisp* list);
+Lisp* move_to_CDR(const char* str, int* index, Lisp* list);
+bool should_move_to_CDR(const char* str, int* index);
+bool is_invalid(const char* str);
+void reduce_test_count_atoms(Lisp* atom, int* accum);
+void reduce_test_count_even_atoms(Lisp* atom, int* accum);
+void test_lisp(void); 
+Lisp* lisp_atom(const int a);
+Lisp* lisp_cons(const Lisp* l1, const Lisp* l2);
+Lisp* lisp_car(const Lisp* l);
+Lisp* lisp_cdr(const Lisp* l);
+int lisp_get_val(const Lisp* l);
+bool lisp_is_atomic(const Lisp* l);
+Lisp* lisp_copy(const Lisp* l);
+int lisp_length(const Lisp* l);
+void lisp_to_string(const Lisp* l, char* str);
+void lisp_free(Lisp** l);
+Lisp* lisp_from_string(const char* str);
+Lisp* lisp_list(const int n, ...);
+void lisp_reduce(void (*func)(Lisp* l, int* n), Lisp* l, int* acc);
 
-// Returns the cdr (all but the 1st) component of the list 'l'.
-// Does not copy any data.
-lisp* lisp_cdr(const lisp* l);
-
-// Returns the data/value stored in the cons 'l'
-atomtype lisp_getval(const lisp* l);
-
-// Returns a boolean depending up whether l points to an atom (not a list)
-bool lisp_isatomic(const lisp* l);
-
-// Returns a deep copy of the list 'l'
-lisp* lisp_copy(const lisp* l);
-
-// Returns number of components in the list.
-int lisp_length(const lisp* l);
-
-// Returns stringified version of list
-void lisp_tostring(const lisp* l, char* str);
-
-// Clears up all space used
-// Double pointer allows function to set 'l' to NULL on success
-void lisp_free(lisp** l);
-
-/* ------------- Tougher Ones : Extensions ---------------*/
-
-// Builds a new list based on the string 'str'
-lisp* lisp_fromstring(const char* str);
-
-// Returns a new list from a set of existing lists.
-// A variable number 'n' lists are used.
-// Data in existing lists are reused, and not copied.
-// You need to understand 'varargs' for this.
-lisp* lisp_list(const int n, ...);
-
-// Allow a user defined function 'func' to be applied to
-// each atom in the list l.
-// The user-defined 'func' is passed a pointer to a cons,
-// and will maintain an accumulator of the result.
-void lisp_reduce(void (*func)(lisp* l, atomtype* n), lisp* l, atomtype* acc);
