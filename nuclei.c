@@ -25,12 +25,20 @@ void parse_list(Token_list* list) {
     Prog_log* program_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
     program_log->executing = true;
     tree->program = descend_recursively(&current, program_log);
-    if (program_log->num_errors == 0) {
+    if (!(program_log->parser_error)) {
         printf("Parsed OK\n");
     } else {
         printf("Not parsed correctly\n");
         print_log(program_log);
     }
+    #ifdef INTERP
+        if (program_log->interp_error) {
+            printf("Interpreter failed.\n");
+            if (!(program_log->parser_error)) {
+                print_log(program_log);
+            }
+        }
+    #endif
     free_tree(tree);
     free(program_log);
 }
@@ -227,7 +235,7 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
     #endif
     loop->child2 = handle_INSTRCTS(current, program_log);
     #ifdef INTERP
-        if (execution_state) {
+        if (execution_state && !execute) {
             program_log->executing = true;
         }
         if (execution_state && execute) {
@@ -303,8 +311,7 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log) {
 
 Lisp* evaluate_plus(Lisp* arg1, Lisp* arg2, Prog_log* log) {
     if (!lisp_is_atomic(arg1) || !lisp_is_atomic(arg2)) {
-        log->errors[log->num_errors] = "INTERPRETER ERROR: arguments for PLUS are not atomic, so PLUS cannot be evaluated.\n";
-        (log->num_errors)++;
+        add_error(log, "INTERPRETER ERROR: arguments for PLUS are not atomic, so PLUS cannot be evaluated.\n", false);
         return NULL;
     } else {
         int result = lisp_get_val(arg1) + lisp_get_val(arg2);
@@ -341,8 +348,7 @@ Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* program_log) {
 
 bool evaluate_bool(token_type type, Lisp* arg1, Lisp* arg2, Prog_log* log) {
     if (!lisp_is_atomic(arg1) || !lisp_is_atomic(arg2)) {
-        log->errors[log->num_errors] = "INTERPRETER ERROR: arguments for boolean function are not atomic, so boolean function cannot be evaluated.\n";
-        (log->num_errors)++;
+        add_error(log, "INTERPRETER ERROR: arguments for boolean function are not atomic, so boolean function cannot be evaluated.\n", false);
         return false;
     }
     int val1 = lisp_get_val(arg1);
@@ -397,8 +403,7 @@ Tree_node* handle_VAR(Token_node** current, Prog_log* program_log) {
     #ifdef EXT
         if (program_log->variables[var->var_name - 'A'] == NULL) {
             var->type = ERROR_NODE;
-            program_log->errors[program_log->num_errors] = "INTERPRETER ERROR: uninitialised variable used\n";
-            (program_log->num_errors)++;
+            add_error(program_log, "INTERPRETER ERROR: uninitialised variable used\n", false);
         }
     #endif
     *current = (*current)->next;
@@ -441,7 +446,7 @@ Tree_node* handle_PRINT(Token_node** current, Prog_log* program_log) {
         print->child1 = handle_STRING(current, program_log);
         #ifdef INTERP
             if (program_log->executing) {
-                printf("%s", (*current)->value->lexeme);
+                printf("%s\n", print->child1->string_value);
             }
         #endif
     } else if (is_LIST(*current)) {
@@ -482,7 +487,7 @@ Tree_node* make_node(grammar_type type) {
 }
 
 Tree_node* parser_fails(Prog_log* program_log, char* error_message) {
-    add_error(program_log, error_message);
+    add_error(program_log, error_message, true);
     Tree_node* error_node = (Tree_node*)allocate_space(1, sizeof(Tree_node));
     error_node->type = ERROR_NODE;
     return error_node;
@@ -621,12 +626,17 @@ void free_log(Prog_log* log) {
     free(log);
 }
 
-void add_error(Prog_log* program_log, char* error_message) {
+void add_error(Prog_log* program_log, char* error_message, bool parsing) {
     if (program_log->num_errors < 20) {
         program_log->errors[program_log->num_errors] = error_message;
         (program_log->num_errors)++;
     } else {
         program_log->overflow = true;
+    }
+    if (parsing) {
+        program_log->parser_error = true;
+    } else {
+        program_log->interp_error = true;
     }
 }
 

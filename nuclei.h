@@ -53,6 +53,8 @@ typedef struct {
 } Syntax_tree;
 
 typedef struct {
+    bool parser_error;
+    bool interp_error;
     int num_errors;
     char* errors[MAXERR];
     bool overflow;
@@ -102,5 +104,5 @@ void free_tree(Syntax_tree* tree);
 void free_node(Tree_node* node);
 void print_log(Prog_log* log);
 void free_log(Prog_log* log);
-void add_error(Prog_log* program_log, char* error_message);
+void add_error(Prog_log* program_log, char* error_message, bool parsing);
 void test(void);

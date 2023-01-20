@@ -597,7 +597,7 @@ void handle_in_state(Token_list* tokens, Automata* automata, char c) {
             index++;
         }
         if (index == LEXEMEMAXLEN) {
-            throw_error("ERROR: literal lexeme greater than maximum allowed string length\n");
+            throw_error("ERROR: literal/string lexeme greater than maximum allowed string length\n");
         }
         automata->token->lexeme[index] = c;
     }
