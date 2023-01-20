@@ -52,7 +52,7 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             break;
         case s_in_literal:
         case s_in_string:
-            handle_string_literal(tokens, automata, c);
+            handle_lexeme(tokens, automata, c);
             break;
         case s_in_invalid:
             handle_s_invalid(tokens, automata, c);
@@ -430,7 +430,7 @@ void check_end_of_token(Token_list* tokens, Automata* automata, token_type type,
 }
 
 
-void handle_string_literal(Token_list* tokens, Automata* automata, char c) {
+void handle_lexeme(Token_list* tokens, Automata* automata, char c) {
     if ((automata->state == s_in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
         automata->state = s_start;

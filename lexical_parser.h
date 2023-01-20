@@ -83,7 +83,7 @@ void start_variable(Automata* automata, char c);
 void start_lexeme(Automata* automata, char c);
 void check_for_var(Token_list* tokens, Automata* automata, char name, char c);
 void check_end_of_token(Token_list* tokens, Automata* automata, token_type type, char c);
-void handle_string_literal(Token_list* tokens, Automata* automata, char c);
+void handle_lexeme(Token_list* tokens, Automata* automata, char c);
 void handle_s_invalid(Token_list* tokens, Automata* automata, char c);
 void handle_s_variable(Token_list* tokens, Automata* automata, char c);
 void print_tokens(Token_list* tokens);

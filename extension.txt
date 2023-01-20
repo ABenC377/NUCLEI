@@ -1,4 +1,5 @@
 my extension works by compiling the same files as the interpreter (and so also the parser), but with the -DEXT flag (as well as the -DINTERP flag).  The extension does the following additional things:
  - As well as simply failing when there is a parsing error, my program makes a note of it the error in an error log and tries to continue.  At the end, it will tell you that parsing failed, and give you the first 20 error messages which were generated.  This makes debugging your NUCLEI program quicker (because you don't need to fix problems one at a time).
+ - additionally, the error log points to the line and column of the offending word in the code.
  - It doesn't allow undeclared variables to be used - it makes the node an error-type node, and adds an interpreter error to the error log.
   

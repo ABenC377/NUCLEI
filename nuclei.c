@@ -31,9 +31,11 @@ void parse_list(Token_list* list) {
         }
     #endif
     printf((program_log->parser_error) ? "Not parsed correctly\n" : "Parsed OK\n");
-    if (program_log->parser_error || program_log->interp_error) {
-        print_log(program_log);
-    }
+    #ifdef EXT
+        if (program_log->parser_error || program_log->interp_error) {
+            print_log(program_log);
+        }
+    #endif
     free_tree(tree);
     free(program_log);
 }
