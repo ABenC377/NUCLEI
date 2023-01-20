@@ -295,7 +295,7 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log) {
         if (type == t_plus) {
             int_function->list = evaluate_plus(int_function->child1->list, int_function->child2->list, program_log);
         } else {
-            int_function->list = evaluate_length(int_function->child2->list);
+            int_function->list = evaluate_length(int_function->child1->list);
         }
     #endif
     return int_function;
