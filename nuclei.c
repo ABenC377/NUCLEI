@@ -258,7 +258,7 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log) {
         list_function->child2 = handle_LIST(current, program_log);
     }
     #ifdef INTERP
-        list_function->list = evaluate_list_function(type, list_function->child1->list, list_function->child2->list);
+        list_function->list = evaluate_list_function(type, list_function->child1->list, (list_function->child2) ? list_function->child2->list : NULL);
     #endif
     return list_function;
 }

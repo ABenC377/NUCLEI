@@ -195,7 +195,7 @@ void consider_adjacent_nodes(const Lisp* l, char* str, int* index) {
 void add_integer_to_string(long integer, char* str, int* index) {
     long remainder = get_absolute(integer, str, index);
     int remaining_digits = get_log_ten(remainder);
-    while (remaining_digits >= 0) {
+    while (remaining_digits > 0) {
         long divisor = get_power_of_ten(remaining_digits);
         long toAdd = remainder / divisor;
         str[(*index)++] = ('0' + (char)toAdd);

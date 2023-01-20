@@ -58,7 +58,6 @@ run: nuclei_pd
 	./nuclei_id test_code/demo2.ncl
 	./nuclei_id test_code/demo3.ncl
 	./nuclei_id test_code/fibonacci.ncl
-	./nuclei_id test_code/inf_loop.ncl
 	./nuclei_id test_code/parse_fail.ncl
 	./nuclei_id test_code/parse_pass_interp_fail.ncl
 	./nuclei_id test_code/print_set.ncl
