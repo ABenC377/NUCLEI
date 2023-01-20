@@ -610,6 +610,10 @@ void handle_invalid(Token_list* tokens, Automata* automata, char c) {
     if (is_white_space(c)) {
         automata->state = s_start;
         make_and_add_simple_token(tokens, automata, t_invalid);
+    } else if (c == ')') {
+        automata->state = s_start;
+        make_and_add_simple_token(tokens, automata, t_invalid);
+        make_and_add_simple_token(tokens, automata, t_r_parenthesis);
     }
 }
 
