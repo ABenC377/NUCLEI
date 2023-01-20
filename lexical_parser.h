@@ -54,15 +54,14 @@ typedef enum {
     s_in_string,
     s_in_invalid,
     s_in_variable,
-    s_N, s_NI, s_NIL,
-    s_W, s_WH, s_WHI, s_WHIL, s_WHILE,
-    s_I, s_IF,
-    s_P, s_PR, s_PRI, s_PRIN, s_PRINT, s_PL, s_PLU, s_PLUS,
-    s_S, s_SE, s_SET,
-    s_L, s_LE, s_LES, s_LESS, s_LEN, s_LENG, s_LENGT, s_LENGTH,
-    s_G, s_GR, s_GRE, s_GREA, s_GREAT, s_GREATE, s_GREATER,
-    s_E, s_EQ, s_EQU, s_EQUA, s_EQUAL,
-    s_C, s_CA, s_CAR, s_CD, s_CDR, s_CO, s_CON, s_CONS
+    s_C = 'C', s_E = 'E', s_G = 'G', s_I = 'I', s_L = 'L', 
+    s_N = 'N', s_P = 'P', s_S = 'S', s_W = 'W', s_NI, 
+    s_NIL, s_WH, s_WHI, s_WHIL, s_WHILE, s_IF, s_PR, 
+    s_PRI, s_PRIN, s_PRINT, s_PL, s_PLU, s_PLUS, s_SE, 
+    s_SET, s_LE, s_LES, s_LESS, s_LEN, s_LENG, s_LENGT, 
+    s_LENGTH, s_GR, s_GRE, s_GREA, s_GREAT, s_GREATE, 
+    s_GREATER, s_EQ, s_EQU, s_EQUA, s_EQUAL, s_CA, s_CAR, 
+    s_CD, s_CDR, s_CO, s_CON, s_CONS
 } automata_state;
 
 typedef struct {
@@ -78,6 +77,8 @@ bool is_white_space(char c) ;
 void add_variable(Token_list* tokens, Automata* automata, char name) ;
 void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type);
 void handle_s_start(Token_list* tokens, Automata* automata, char c);
+void start_literal(Automata* automata);
+void start_string(Automata* automata);
 void check_for_var(Token_list* tokens, Automata* automata, char name, char c);
 void check_end_of_token(Token_list* tokens, Automata* automata, token_type type, char c);
 void handle_s_in_state(Token_list* tokens, Automata* automata, char c);

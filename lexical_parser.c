@@ -398,24 +398,8 @@ void handle_s_start(Token_list* tokens, Automata* automata, char c) {
                 start_string(automata);
                 break;
             case 'A'...'Z':
-                if (c == 'C') {
-                    automata->state = s_C;
-                }  else if (c == 'E') {
-                    automata->state = s_E;
-                } else if (c == 'G') {
-                    automata->state = s_G;
-                } else if (c == 'I') {
-                    automata->state = s_I;
-                } else if (c == 'L') {
-                    automata->state = s_L;
-                } else if (c == 'N') {
-                    automata->state = s_N;
-                } else if (c == 'P') {
-                    automata->state = s_P;
-                } else if (c == 'S') {
-                    automata->state = s_S;
-                } else if (c == 'W') {
-                    automata->state = s_W;
+                if (c == 'C' || c == 'E' || c == 'G' || c == 'I' || c == 'L' || c == 'N' || c == 'P' || c == 'S' || c == 'W') {
+                    automata->state = c;
                 } else {
                     automata->token = (Token*)allocate_space(1, sizeof(Token));
                     automata->token->type = t_variable;
