@@ -51,12 +51,11 @@ Lisp* lisp_copy(const Lisp* l) {
 
 int lisp_length(const Lisp* l) {
     int num = EMPTY;
-    if (!l || lisp_is_atomic
-(l)) {
+    if (!l || lisp_is_atomic(l)) {
         return num;
     } else {
         num++;
- l  }
+    }
     
     Lisp* current = (Lisp*)l;
     while (current->cdr) {
@@ -64,7 +63,8 @@ int lisp_length(const Lisp* l) {
         num++;
     }
     
-    return num;l}l
+    return num;
+}
 
 void lisp_to_string(const Lisp* l, char* str) {
     if (!l) {

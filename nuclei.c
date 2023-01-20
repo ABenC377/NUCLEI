@@ -169,6 +169,9 @@ bool is_LOOP(Token_node* current) {
 }
 
 Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
+    #ifdef INTERP
+        Token_node* loop_start = (*current);
+    #endif
     Tree_node* loop = make_node(LOOP);
     if (!next_token_is(current, 1, t_while)) {
         return parser_fails(program_log, "Expecting 'WHILE' in loop\n");
@@ -177,13 +180,31 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         return parser_fails(program_log, "Expecting opening parenthesis before bool function in loop\n");
     }
     loop->child1 = handle_BOOLFUNC(current, program_log);
+    #ifdef INTERP
+        bool execution_state = program_log->executing;
+        bool execute = (lisp_get_val(loop->child1->list) == 1);
+    #endif
     if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(program_log, "Expecting closing parenthesis after bool function in loop\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(program_log, "Expecting opening parenthesis before instructions within loop\n");
     }
+    #ifdef INTERP
+        if (execution_state && !execute) {
+            program_log->executing = false;
+        }
+    #endif
     loop->child2 = handle_INSTRCTS(current, program_log);
+    #ifdef INTERP
+        if (execution_state) {
+            program_log->executing = true;
+        }
+        if (execution_state && execute) {
+            *current = loop_start;
+            loop = handle_loop(current, program_log);
+        }
+    #endif
     return loop;
 }
 
@@ -204,7 +225,20 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log) {
     if (type == t_CONS) {
         list_function->child2 = handle_LIST(current, program_log);
     }
+    #ifdef INTERP
+        list_function->list = evaluate_list_function(type, list_function->child1, list_function->child2);
+    #endif
     return list_function;
+}
+
+Lisp* evaluate_list_function(token_type type, Lisp* arg1, Lisp* arg2) {
+    if (type == t_CAR) {
+        return lisp_car(arg1);
+    } else if (type == t_CDR) {
+        return lisp_cdr(arg1);
+    } else if (type == t_CONS) {
+        return lisp_cons(arg1, arg2);
+    }
 }
     
 
@@ -225,7 +259,30 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log) {
     if (type == t_plus) {
         int_function->child2 = handle_LIST(current, program_log);
     }
+    #ifdef INTERP
+        if (type == t_plus) {
+            int_function->list = evaluate_plus(int_function->child1, int_function->child2);
+        } else {
+            int_function->list = evaluate_length(int_function->child2);
+        }
+    #endif
     return int_function;
+}
+
+Lisp* evaluate_plus(Lisp* arg1, Lisp* arg2, Prog_log* log) {
+    if (!lisp_is_atomic(arg1) || !lisp_is_atomic(arg2)) {
+        log->errors[log->num_errors] = "INTERPRETER ERROR: arguments for PLUS are not atomic, so PLUS cannot be evaluated.\n";
+        (log->num_errors)++;
+        return NULL;
+    } else {
+        int result = lisp_get_val(arg1) + lisp_get_val(arg2);
+        return lisp_atom(result);
+    }
+}
+
+Lisp* evaluate_length(Lisp* arg) {
+    int result = lisp_length(arg);
+    return lisp_atom(result);
 }
 
 bool is_BOOLFUNC(Token_node* current) {
@@ -243,7 +300,28 @@ Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* program_log) {
         bool_function->child1 = handle_LIST(current, program_log);
         bool_function->child2 = handle_LIST(current, program_log);
     }
+    #ifdef INTERP
+        bool evaluates = evaluate_bool(type, bool_function->child1, bool_function->child2, program_log);
+        bool_function->list = (evaluates) ? lisp_atom(1) : lisp_atom(0);
+    #endif
     return bool_function;
+}
+
+bool evaluate_bool(token_type type, Lisp* arg1, Lisp* arg2, Prog_log* log) {
+    if (!lisp_is_atomic(arg1) || !lisp_is_atomic(arg2)) {
+        log->errors[log->num_errors] = "INTERPRETER ERROR: arguments for boolean function are not atomic, so boolean function cannot be evaluated.\n";
+        (log->num_errors)++;
+        return false;
+    }
+    int val1 = lisp_get_val(arg1);
+    int val2 = lisp_get_val(arg2);
+    if (type == t_less) {
+        return (arg1 < arg2);
+    } else if (type == t_equal) {
+        return (arg1 == arg2);
+    } else {
+        return (arg1 < arg2);
+    }
 }
 
 Tree_node* handle_LIST(Token_node** current, Prog_log* program_log) {
