@@ -12,6 +12,8 @@ Token_list* run_lexical_analyser(int argc, char* argv[]) {
     
     fclose(fp);
     
+    print_tokens(tokens); // debugging
+    
     return tokens;
 }
 
@@ -68,6 +70,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_NI;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'N');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'N');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -82,6 +87,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_NIL:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_nil);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_nil);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -91,6 +99,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_WH;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'W');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'W');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -119,6 +130,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_WHILE:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_while);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_while);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -128,6 +142,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_IF;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'I');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'I');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -135,6 +152,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_IF:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_if);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_if);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -146,6 +166,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_PL;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'P');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'P');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -174,6 +197,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_PRINT:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_print);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_print);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -195,6 +221,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_PLUS:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_plus);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_plus);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -204,6 +233,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_SE;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'S');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'S');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -218,6 +250,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_SET:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_set);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_set);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -227,6 +262,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_LE;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'L');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'L');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -250,6 +288,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_LESS:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_less);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_less);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -278,6 +319,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_LENGTH:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_length);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_length);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -287,6 +331,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_GR;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'G');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'G');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -329,6 +376,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_GREATER:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_greater);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_greater);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -338,6 +388,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_EQ;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'E');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'E');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -366,6 +419,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_EQUAL:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_equal);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_equal);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -379,6 +435,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 automata->state = s_CO;
             } else if (is_white_space(c)) {
                 add_variable(tokens, automata, 'C');
+            } else if (c == ')') {
+                add_variable(tokens, automata, 'C');
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -393,6 +452,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_CAR:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CAR);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_CAR);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -407,6 +469,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_CDR:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CDR);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_CDR);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
@@ -428,6 +493,9 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
         case s_CONS:
             if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CONS);
+            } else if (c == ')') {
+                make_and_add_simple_token(tokens, automata, t_CONS);
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
             } else {
                 handle_invalid(tokens, automata, c);
             }
