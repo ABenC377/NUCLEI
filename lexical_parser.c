@@ -12,8 +12,6 @@ Token_list* run_lexical_analyser(int argc, char* argv[]) {
     
     fclose(fp);
     
-    print_tokens(tokens); // debugging
-    
     return tokens;
 }
 
@@ -622,7 +620,7 @@ void handle_variable(Token_list* tokens, Automata* automata, char c) {
         add_token(tokens, automata->token);
         automata->state = s_start;
     } else if (c == ')') {
-        add_variable(tokens, automata, c);
+        add_variable(tokens, automata, automata->token->var_name);
         make_and_add_simple_token(tokens, automata, t_r_parenthesis);
     } else {
         automata->token->type = t_invalid;

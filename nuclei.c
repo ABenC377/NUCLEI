@@ -85,7 +85,7 @@ Tree_node* handle_FUNC(Token_node** current, Prog_log* program_log) {
     } else if (is_LOOP(*current)) {
         function->child1 = handle_LOOP(current, program_log);
     } else {
-        return parser_fails(program_log, "Expecting function in intruction\n");
+        return parser_fails(program_log, "Expecting function in instruction\n");
     }
     return function;
 }
