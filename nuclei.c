@@ -156,43 +156,29 @@ bool is_IF(Token_node* current) {
 
 Tree_node* handle_IF(Token_node** current, Prog_log* program_log) {
     Tree_node* if_node = make_node(IF);
-    if (!next_token_is(current, 1, t_if)) {
-        return parser_fails(program_log, "Expecting 'IF' in if statement\n");
-    }
-    if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, "Expecting opening parenthesis before bool function in if statement\n");
+    if (!next_token_is(current, 1, t_if) || !next_token_is(current, 1, '(')) {
+        return parser_fails(program_log, "Expecting IF before parenthesis in if statement.\n");
     }
     if_node->child1 = handle_BOOLFUNC(current, program_log);
     #ifdef INTERP
         bool execution_state = program_log->executing;
         bool execute = (lisp_get_val(if_node->child1->list) == 1);
     #endif
-    if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(program_log, "Expecting closing parenthesis after bool function in if statement\n");
-    }
-    if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, "Expecting opening parenthesis before first instructions in if statement\n");
+    if (!next_token_is(current, 1, ')') || !next_token_is(current, 1, '(')) {
+        return parser_fails(program_log, "Expecting parentheses between bool and first statement in if statement.\n");
     }
     #ifdef INTERP
-        if (execution_state == true && execute == true) {
-            program_log->executing = true;
-        } else {
-            program_log->executing = false;
-        }
+        program_log->executing = (execution_state == true && execute == true);
     #endif
     if_node->child2 = handle_INSTRCTS(current, program_log);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(program_log, "Expecting opening parenthesis before second instructions in if statement\n");
     }
     #ifdef INTERP
-        if (execution_state == true && execute == false) {
-            program_log->executing = true;
-        } else {
-            program_log->executing = false;
-        }
+        program_log->executing = (execution_state == true && execute == false);
     #endif 
     if_node->child3 = handle_INSTRCTS(current, program_log);
-    #ifdef INTERP
+    #ifdef INTERP 
         program_log->executing = execution_state;
     #endif 
     return if_node;
@@ -207,39 +193,29 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         Token_node* loop_start = (*current);
     #endif
     Tree_node* loop = make_node(LOOP);
-    if (!next_token_is(current, 1, t_while)) {
-        return parser_fails(program_log, "Expecting 'WHILE' in loop\n");
-    }
-    if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, "Expecting opening parenthesis before bool function in loop\n");
+    if (!next_token_is(current, 1, t_while) || !next_token_is(current, 1, '(')) {
+        return parser_fails(program_log, "Expecting WHILE and opening parenthesis before bool function in loop\n");
     }
     loop->child1 = handle_BOOLFUNC(current, program_log);
     #ifdef INTERP
         bool execution_state = program_log->executing;
         bool execute = (lisp_get_val(loop->child1->list) == 1);
     #endif
-    if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(program_log, "Expecting closing parenthesis after bool function in loop\n");
-    }
-    if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, "Expecting opening parenthesis before instructions within loop\n");
+    if (!next_token_is(current, 1, t_r_parenthesis) || !next_token_is(current, 1, t_l_parenthesis)) {
+        return parser_fails(program_log, "Expecting parentheses between bool and instructions within loop\n");
     }
     #ifdef INTERP
-        if (execution_state && !execute) {
-            program_log->executing = false;
-        }
+        program_log->executing = (execution_state && !execute) ? false : program_log->executing;
     #endif
     loop->child2 = handle_INSTRCTS(current, program_log);
     #ifdef INTERP
-        if (execution_state && !execute) {
-            program_log->executing = true;
-        }
         if (execution_state && execute) {
             *current = loop_start;
             free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
             loop = handle_LOOP(current, program_log);
             program_log->executing = execution_state;
         }
+        program_log->executing = (execution_state && !execute) ? true : program_log->executing;
     #endif
     return loop;
 }
