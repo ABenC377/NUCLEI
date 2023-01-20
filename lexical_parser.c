@@ -383,65 +383,66 @@ void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_typ
 }
 
 void handle_s_start(Token_list* tokens, Automata* automata, char c) {
-    switch (c) {
-        // White space should be ignored
-        case ' ':
-        case '\n':
-        case '\t':
-        case '\v':
-        case '\f':
-        case '\r':
-            break;
-        case ')':
-            make_and_add_simple_token(tokens, automata, t_r_parenthesis);
-            break;
-        case '(':
-            make_and_add_simple_token(tokens, automata, t_l_parenthesis);
-            break;
-        case SINGLEQUOTE:
-            automata->token = (Token*)allocate_space(1, sizeof(Token));
-            automata->token->type = t_literal;
-            automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-            automata->state = s_in_literal;
-            break;
-        case '"':
-            automata->token = (Token*)allocate_space(1, sizeof(Token));
-            automata->token->type = t_string;
-            automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-            automata->state = s_in_string;
-            break;
-        case 'A'...'Z':
-            if (c == 'C') {
-                automata->state = s_C;
-            }  else if (c == 'E') {
-                automata->state = s_E;
-            } else if (c == 'G') {
-                automata->state = s_G;
-            } else if (c == 'I') {
-                automata->state = s_I;
-            } else if (c == 'L') {
-                automata->state = s_L;
-            } else if (c == 'N') {
-                automata->state = s_N;
-            } else if (c == 'P') {
-                automata->state = s_P;
-            } else if (c == 'S') {
-                automata->state = s_S;
-            } else if (c == 'W') {
-                automata->state = s_W;
-            } else {
-                automata->token = (Token*)allocate_space(1, sizeof(Token));
-                automata->token->type = t_variable;
-                automata->token->var_name = c;
-                automata->state = s_in_variable;
-            }
-            break;
-        default:
-            automata->token = (Token*)allocate_space(1, sizeof(Token));
-            automata->token->type = t_invalid;
-            add_token(tokens, automata->token);
-            break;
+    if (!is_white_space(c)) {
+        switch (c) {
+            case ')':
+                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
+                break;
+            case '(':
+                make_and_add_simple_token(tokens, automata, t_l_parenthesis);
+                break;
+            case SINGLEQUOTE:
+                start_literal(automata);
+                break;
+            case '"':
+                start_string(automata);
+                break;
+            case 'A'...'Z':
+                if (c == 'C') {
+                    automata->state = s_C;
+                }  else if (c == 'E') {
+                    automata->state = s_E;
+                } else if (c == 'G') {
+                    automata->state = s_G;
+                } else if (c == 'I') {
+                    automata->state = s_I;
+                } else if (c == 'L') {
+                    automata->state = s_L;
+                } else if (c == 'N') {
+                    automata->state = s_N;
+                } else if (c == 'P') {
+                    automata->state = s_P;
+                } else if (c == 'S') {
+                    automata->state = s_S;
+                } else if (c == 'W') {
+                    automata->state = s_W;
+                } else {
+                    automata->token = (Token*)allocate_space(1, sizeof(Token));
+                    automata->token->type = t_variable;
+                    automata->token->var_name = c;
+                    automata->state = s_in_variable;
+                }
+                break;
+            default:
+                handle_s_invalid(tokens, automata, c);
+                break;
+        }
     }
+    
+}
+
+void start_literal(Automata* automata) {
+    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    automata->token->type = t_literal;
+    automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
+    automata->state = s_in_literal;
+}
+
+void start_string(Automata* automata) {
+    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    automata->token->type = t_string;
+    automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
+    automata->state = s_in_string;
 }
 
 void check_for_var(Token_list* tokens, Automata* automata, char name, char c) {
