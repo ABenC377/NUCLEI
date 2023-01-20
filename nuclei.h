@@ -100,8 +100,6 @@ void print_tree_node(Tree_node* node);
 char* get_node_type(Tree_node* node);
 void free_tree(Syntax_tree* tree);
 void free_node(Tree_node* node);
-void throw_error(const char* error_message);
-void* allocate_space(int num, int size);
 void print_log(Prog_log* log);
 void free_log(Prog_log* log);
 void add_error(Prog_log* program_log, char* error_message);

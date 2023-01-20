@@ -2,9 +2,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <string.h>
 
 #define TESTSTRLEN 1000
 #define LISPIMPL "linked"
@@ -21,13 +23,13 @@ typedef struct Lisp {
 void* allocate_space(unsigned int num, unsigned int size);
 void throw_error(const char* error_message);
 void set_string_to_empty(char* str);
-void add_nodeTo_string(const Lisp* l, char* str, int* index);
+void add_node_to_string(const Lisp* l, char* str, int* index);
 void consider_adjacent_nodes(const Lisp* l, char* str, int* index);
 void add_integer_to_string(long integer, char* str, int* index);
-long getAbsolute(long integer, char* str, int* index);
+long get_absolute(long integer, char* str, int* index);
 long get_power_of_ten(int power);
 int get_log_ten(long n);
-int get_value_trom_string(const char* str, int* index);
+int get_value_from_string(const char* str, int* index);
 bool is_positive(const char* str, int* index);
 void add_new_sub_lisp(const char* str, int* index, Lisp* list);
 Lisp* move_to_CDR(const char* str, int* index, Lisp* list);

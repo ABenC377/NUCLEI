@@ -50,289 +50,406 @@ Token_list* get_tokens_from_file(FILE* fp) {
 
 void update_tokens(Token_list* tokens, Automata* automata, char c) {
     switch (automata->state) {
-        case start:
+        case s_start:
             handle_start_state(tokens, automata, c);
             break;
-        case in_literal:
-        case in_string:
+        case s_in_literal:
+        case s_in_string:
             handle_in_state(tokens, automata, c);
             break;
-        case N:
+        case s_in_invalid:
+            handle_invalid(tokens, automata, c);
+            break;
+        case s_in_variable:
+            handle_variable(tokens, automata, c);
+            break;
+        case s_N:
             if (c == 'I') {
-                automata->state = NI;
+                automata->state = s_NI;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'N');
             } else {
-                add_previous_chars(tokens, automata, 'N', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case NI:
+        case s_NI:
             if (c == 'L') {
+                automata->state = s_NIL;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_NIL:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_nil);
             } else {
-                add_previous_chars(tokens, automata, 'N', 2, 'I', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case W:
+        case s_W:
             if (c == 'H') {
-                automata->state = WH;
+                automata->state = s_WH;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'W');
             } else {
-                add_previous_chars(tokens, automata, 'W', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case WH:
+        case s_WH:
             if (c == 'I') {
-                automata->state = WHI;
+                automata->state = s_WHI;
             } else {
-                add_previous_chars(tokens, automata, 'W', 2, 'H', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case WHI:
+        case s_WHI:
             if (c == 'L') {
-                automata->state = WHIL;
+                automata->state = s_WHIL;
             } else {
-                add_previous_chars(tokens, automata, 'W', 3, 'H', 'I', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case WHIL:
+        case s_WHIL:
             if (c == 'E') {
+                automata->state = s_WHILE;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_WHILE:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_while);
             } else {
-                add_previous_chars(tokens, automata, 'W', 4, 'H', 'I', 'L', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case I:
+        case s_I:
             if (c == 'F') {
+                automata->state = s_IF;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'I');
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_IF:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_if);
             } else {
-                add_previous_chars(tokens, automata, 'I', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case P:
+        case s_P:
             if (c == 'R') {
-                automata->state = PR;
+                automata->state = s_PR;
             } else if (c == 'L') {
-                automata->state = PL;
+                automata->state = s_PL;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'P');
             } else {
-                add_previous_chars(tokens, automata, 'P', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case PR:
+        case s_PR:
             if (c == 'I') {
-                automata->state = PRI;
+                automata->state = s_PRI;
             } else {
-                add_previous_chars(tokens, automata, 'P', 2, 'R', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case PRI:
+        case s_PRI:
             if (c == 'N') {
-                automata->state = PRIN;
+                automata->state = s_PRIN;
             } else {
-                add_previous_chars(tokens, automata, 'P', 3, 'R', 'I', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case PRIN:
+        case s_PRIN:
             if (c == 'T') {
+                automata->state = s_PRINT;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_PRINT:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_print);
             } else {
-                add_previous_chars(tokens, automata, 'P', 4, 'R', 'I', 'N', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case PL:
+        case s_PL:
             if (c == 'U') {
-                automata->state = PLU;
+                automata->state = s_PLU;
             } else {
-                add_previous_chars(tokens, automata, 'P', 2, 'L', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case PLU:
+        case s_PLU:
             if (c == 'S') {
+                automata->state = s_PLUS;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_PLUS:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_plus);
             } else {
-                add_previous_chars(tokens, automata, 'P', 3, 'L', 'U', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case S:
+        case s_S:
             if (c == 'E') {
-                automata->state = SE;
+                automata->state = s_SE;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'S');
             } else {
-                add_previous_chars(tokens, automata, 'S', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case SE:
+        case s_SE:
             if (c == 'T') {
+                automata->state = s_SET;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_SET:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_set);
             } else {
-                add_previous_chars(tokens, automata, 'S', 2, 'E', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case L:
+        case s_L:
             if (c == 'E') {
-                automata->state = LE;
+                automata->state = s_LE;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'L');
             } else {
-                add_previous_chars(tokens, automata, 'L', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case LE:
+        case s_LE:
             if (c == 'S') {
-                automata->state = LES;
+                automata->state = s_LES;
             } else if (c == 'N') {
-                automata->state = LEN;
+                automata->state = s_LEN;
             } else {
-                add_previous_chars(tokens, automata, 'L', 2, 'E', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case LES:
+        case s_LES:
             if (c == 'S') {
+                automata->state = s_LESS;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_LESS:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_less);
             } else {
-                add_previous_chars(tokens, automata, 'L', 3, 'E', 'S', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case LEN:
+        case s_LEN:
             if (c == 'G') {
-                automata->state = LENG;
+                automata->state = s_LENG;
             } else {
-                add_previous_chars(tokens, automata, 'L', 3, 'E', 'N', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case LENG:
+        case s_LENG:
             if (c == 'T') {
-                automata->state = LENGT;
+                automata->state = s_LENGT;
             } else {
-                add_previous_chars(tokens, automata, 'L', 4, 'E', 'N', 'G', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case LENGT:
+        case s_LENGT:
             if (c == 'H') {
+                automata->state = s_LENGTH;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_LENGTH:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_length);
             } else {
-                add_previous_chars(tokens, automata, 'L', 5, 'E', 'N', 'G', 'T', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case G:
+        case s_G:
             if (c == 'R') {
-                automata->state = GR;
+                automata->state = s_GR;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'G');
             } else {
-                add_previous_chars(tokens, automata, 'G', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case GR:
+        case s_GR:
             if (c == 'E') {
-                automata->state = GRE;
+                automata->state = s_GRE;
             } else {
-                add_previous_chars(tokens, automata, 'G', 2, 'R', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case GRE:
+        case s_GRE:
             if (c == 'A') {
-                automata->state = GREA;
+                automata->state = s_GREA;
             } else {
-                add_previous_chars(tokens, automata, 'G', 3, 'R', 'E', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case GREA:
+        case s_GREA:
             if (c == 'T') {
-                automata->state = GREAT;
+                automata->state = s_GREAT;
             } else {
-                add_previous_chars(tokens, automata, 'G', 3, 'R', 'E', 'A', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case GREAT:
+        case s_GREAT:
             if (c == 'E') {
-                automata->state = GREATE;
+                automata->state = s_GREATE;
             } else {
-                add_previous_chars(tokens, automata, 'G', 5, 'R', 'E', 'A', 'T', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case GREATE:
+        case s_GREATE:
             if (c == 'R') {
+                automata->state = s_GREATER;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_GREATER:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_greater);
             } else {
-                add_previous_chars(tokens, automata, 'G', 6, 'R', 'E', 'A', 'T', 'E', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case E:
+        case s_E:
             if (c == 'Q') {
-                automata->state = EQ;
+                automata->state = s_EQ;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'E');
             } else {
-                add_previous_chars(tokens, automata, 'E', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case EQ:
+        case s_EQ:
             if (c == 'U') {
-                automata->state = EQU;
+                automata->state = s_EQU;
             } else {
-                add_previous_chars(tokens, automata, 'E', 2, 'Q', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case EQU:
+        case s_EQU:
             if (c == 'A') {
-                automata->state = EQUA;
+                automata->state = s_EQUA;
             } else {
-                add_previous_chars(tokens, automata, 'E', 3, 'Q', 'U', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case EQUA:
+        case s_EQUA:
             if (c == 'L') {
+                automata->state = s_EQUAL;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_EQUAL:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_equal);
             } else {
-                add_previous_chars(tokens, automata, 'E', 4, 'Q', 'U', 'A', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case C:
+        case s_C:
             if (c == 'A') {
-                automata->state = CA;
+                automata->state = s_CA;
             } else if (c == 'D') { 
-                automata->state = CD;
+                automata->state = s_CD;
             } else if (c == 'O') {
-                automata->state = CO;
+                automata->state = s_CO;
+            } else if (is_white_space(c)) {
+                add_variable(tokens, automata, 'C');
             } else {
-                add_previous_chars(tokens, automata, 'C', 1, c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case CA:
+        case s_CA:
             if (c == 'R') {
+                automata->state = s_CAR;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_CAR:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CAR);
             } else {
-                add_previous_chars(tokens, automata, 'C', 2, 'A', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case CD:
+        case s_CD:
             if (c == 'R') {
+                automata->state = s_CDR;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_CDR:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CDR);
             } else {
-                add_previous_chars(tokens, automata, 'C', 2, 'D', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case CO:
+        case s_CO:
             if (c == 'N') {
-                automata->state = CON;
+                automata->state = s_CON;
             } else {
-                add_previous_chars(tokens, automata, 'C', 2, 'O', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
-        case CON:
+        case s_CON:
             if (c == 'S') {
+                automata->state = s_CONS;
+            } else {
+                handle_invalid(tokens, automata, c);
+            }
+            break;
+        case s_CONS:
+            if (is_white_space(c)) {
                 make_and_add_simple_token(tokens, automata, t_CONS);
             } else {
-                add_previous_chars(tokens, automata, 'C', 3, 'O', 'N', c);
+                handle_invalid(tokens, automata, c);
             }
             break;
     }
 }
 
-void add_previous_chars(Token_list* tokens, Automata* automata, char var, int n, ...) {
-    add_variable_token(tokens, automata, var);
-    va_list arg_ptr;
-    va_start(arg_ptr, n);
-    for (int i = 0; i < n; i++) {
-        update_tokens(tokens, automata, va_arg(arg_ptr, int));
-    }
-    va_end(arg_ptr);
+bool is_white_space(char c) {
+    return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f' || c == '\r');
+}
+
+void add_variable(Token_list* tokens, Automata* automata, char name) {
+    automata->state = s_start;
+    Token* new_token = (Token*)allocate_space(1, sizeof(Token));
+    new_token->type = t_variable;
+    new_token->var_name = name;
+    add_token(tokens, new_token);
 }
 
 // This only works for token types that do not have a lexeme or other value
 void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type) {
-    automata->state = start;
+    automata->state = s_start;
     Token* new_token = (Token*)allocate_space(1, sizeof(Token));
     new_token->type = type;
     add_token(tokens, new_token);
@@ -358,35 +475,38 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
             automata->token = (Token*)allocate_space(1, sizeof(Token));
             automata->token->type = t_literal;
             automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-            automata->state = in_literal;
+            automata->state = s_in_literal;
             break;
         case '"':
             automata->token = (Token*)allocate_space(1, sizeof(Token));
             automata->token->type = t_string;
             automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-            automata->state = in_string;
+            automata->state = s_in_string;
             break;
         case 'A'...'Z':
             if (c == 'C') {
-                automata->state = C;
+                automata->state = s_C;
             }  else if (c == 'E') {
-                automata->state = E;
+                automata->state = s_E;
             } else if (c == 'G') {
-                automata->state = G;
+                automata->state = s_G;
             } else if (c == 'I') {
-                automata->state = I;
+                automata->state = s_I;
             } else if (c == 'L') {
-                automata->state = L;
+                automata->state = s_L;
             } else if (c == 'N') {
-                automata->state = N;
+                automata->state = s_N;
             } else if (c == 'P') {
-                automata->state = P;
+                automata->state = s_P;
             } else if (c == 'S') {
-                automata->state = S;
+                automata->state = s_S;
             } else if (c == 'W') {
-                automata->state = W;
+                automata->state = s_W;
             } else {
-                add_variable_token(tokens, automata, c);
+                automata->token = (Token*)allocate_space(1, sizeof(Token));
+                automata->token->type = t_variable;
+                automata->token->var_name = c;
+                automata->state = s_in_variable;
             }
             break;
         default:
@@ -397,21 +517,14 @@ void handle_start_state(Token_list* tokens, Automata* automata, char c) {
     }
 }
 
-void add_variable_token(Token_list* tokens, Automata* automata, char name) {
-    automata->token = (Token*)allocate_space(1, sizeof(Token));
-    automata->token->type = t_variable;
-    automata->token->var_name = name;
-    add_token(tokens, automata->token);
-    automata->state = start;
-}
 
 void handle_in_state(Token_list* tokens, Automata* automata, char c) {
-    if ((automata->state == in_literal) && (c == SINGLEQUOTE)) {
+    if ((automata->state == s_in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
-        automata->state = start;
-    } else if ((automata->state == in_string) && (c == '"')) {
+        automata->state = s_start;
+    } else if ((automata->state == s_in_string) && (c == '"')) {
         add_token(tokens, automata->token);
-        automata->state = start;
+        automata->state = s_start;
     } else {
         int index = 0;
         while ((index < LEXEMEMAXLEN) && (automata->token->lexeme[index] != '\0')) {
@@ -421,6 +534,24 @@ void handle_in_state(Token_list* tokens, Automata* automata, char c) {
             throw_error("ERROR: literal lexeme greater than maximum allowed string length\n");
         }
         automata->token->lexeme[index] = c;
+    }
+}
+
+void handle_invalid(Token_list* tokens, Automata* automata, char c) {
+    automata->state = s_in_invalid;
+    if (is_white_space(c)) {
+        automata->state = s_start;
+        make_and_add_simple_token(tokens, automata, t_invalid);
+    }
+}
+
+void handle_variable(Token_list* tokens, Automata* automata, char c) {
+    if (is_white_space(c)) {
+        add_token(tokens, automata->token);
+        automata->state = s_start;
+    } else {
+        automata->token->type = t_invalid;
+        automata->state = s_in_invalid;
     }
 }
 
@@ -555,201 +686,240 @@ void lexical_analysis_test(void) {
     
     // States to NIL
     char test_c = 'I';
-    test_automata->state = N;
+    test_automata->state = s_N;
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == NI);
+    assert(test_automata->state == s_NI);
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_NIL);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_nil);
     
     // States to WHILE
     test_c = 'W';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == W);
+    assert(test_automata->state == s_W);
     test_c = 'H';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == WH);
+    assert(test_automata->state == s_WH);
     test_c = 'I';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == WHI);
+    assert(test_automata->state == s_WHI);
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == WHIL);
+    assert(test_automata->state == s_WHIL);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_WHILE);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_while);
     
     // states to IF
     test_c = 'I';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == I);
+    assert(test_automata->state == s_I);
     test_c = 'F';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_IF);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_if);
     
     // states to PRINT
     test_c = 'P';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == P);
+    assert(test_automata->state == s_P);
     test_c = 'R';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == PR);
+    assert(test_automata->state == s_PR);
     test_c = 'I';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == PRI);
+    assert(test_automata->state == s_PRI);
     test_c = 'N';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == PRIN);
+    assert(test_automata->state == s_PRIN);
     test_c = 'T';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_PRINT);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_print);
     
     // states to PLUS
     test_c = 'P';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == P);
+    assert(test_automata->state == s_P);
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == PL);
+    assert(test_automata->state == s_PL);
     test_c = 'U';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == PLU);
+    assert(test_automata->state == s_PLU);
     test_c = 'S';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_PLUS);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_plus);
     
     // states to SET
     test_c = 'S';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == S);
+    assert(test_automata->state == s_S);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == SE);
+    assert(test_automata->state == s_SE);
     test_c = 'T';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_SET);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_set);
     
     // states to LENGTH
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == L);
+    assert(test_automata->state == s_L);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LE);
+    assert(test_automata->state == s_LE);
     test_c = 'N';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LEN);
+    assert(test_automata->state == s_LEN);
     test_c = 'G';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LENG);
+    assert(test_automata->state == s_LENG);
     test_c = 'T';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LENGT);
+    assert(test_automata->state == s_LENGT);
     test_c = 'H';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_LENGTH);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_length);
     
     // states to LESS
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == L);
+    assert(test_automata->state == s_L);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LE);
+    assert(test_automata->state == s_LE);
     test_c = 'S';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == LES);
+    assert(test_automata->state == s_LES);
     test_c = 'S';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_LESS);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_less);
     
     // states to GREATER
     test_c = 'G';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == G);
+    assert(test_automata->state == s_G);
     test_c = 'R';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == GR);
+    assert(test_automata->state == s_GR);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == GRE);
+    assert(test_automata->state == s_GRE);
     test_c = 'A';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == GREA);
+    assert(test_automata->state == s_GREA);
     test_c = 'T';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == GREAT);
+    assert(test_automata->state == s_GREAT);
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == GREATE);
+    assert(test_automata->state == s_GREATE);
     test_c = 'R';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_GREATER);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_greater);
     
     // states to EQUAL
     test_c = 'E';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == E);
+    assert(test_automata->state == s_E);
     test_c = 'Q';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == EQ);
+    assert(test_automata->state == s_EQ);
     test_c = 'U';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == EQU);
+    assert(test_automata->state == s_EQU);
     test_c = 'A';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == EQUA);
+    assert(test_automata->state == s_EQUA);
     test_c = 'L';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_EQUAL);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_equal);
     
     // states to CAR
     test_c = 'C';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == C);
+    assert(test_automata->state == s_C);
     test_c = 'A';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == CA);
+    assert(test_automata->state == s_CA);
     test_c = 'R';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_CAR);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_CAR);
     
     // states to CDR
     test_c = 'C';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == C);
+    assert(test_automata->state == s_C);
     test_c = 'D';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == CD);
+    assert(test_automata->state == s_CD);
     test_c = 'R';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_CDR);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_CDR);
     
     // states to CONS
     test_c = 'C';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == C);
+    assert(test_automata->state == s_C);
     test_c = 'O';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == CO);
+    assert(test_automata->state == s_CO);
     test_c = 'N';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == CON);
+    assert(test_automata->state == s_CON);
     test_c = 'S';
     update_tokens(test_tokens, test_automata, test_c);
-    assert(test_automata->state == start);
+    assert(test_automata->state == s_CONS);
+    test_c = ' ';
+    update_tokens(test_tokens, test_automata, test_c);
+    assert(test_automata->state == s_start);
     assert(test_tokens->end->value->type == t_CONS);
     
     // void add_previous_chars(int n, Token_list* tokens, Automata* automata, char var, ...);

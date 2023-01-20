@@ -105,6 +105,9 @@ Tree_node* handle_RETFUNC(Token_node** current, Prog_log* program_log) {
     } else {
         return parser_fails(program_log, "Expecting list, int, or bool function in return function\n");
     }
+    #ifdef INTERP
+        ret_function->list = ret_function->child1->list;
+    #endif
     return ret_function;
 }
 
@@ -131,6 +134,12 @@ Tree_node* handle_SET(Token_node** current, Prog_log* program_log) {
     } else {
         set->child1 = handle_VAR(current, program_log);
         set->child2 = handle_LIST(current, program_log);
+        #ifdef INTERP
+            if (program_log->executing == true) {
+                int var_name = set->child1->var_name - 'A';
+                program_log->variables[var_name] = set->child2->list;
+            }
+        #endif
         return set;
     }
 }
@@ -152,7 +161,7 @@ Tree_node* handle_IF(Token_node** current, Prog_log* program_log) {
     if_node->child1 = handle_BOOLFUNC(current, program_log);
     #ifdef INTERP
         bool execution_state = program_log->executing;
-        bool execute = (lisp_get_val(loop->child1->list) == 1);
+        bool execute = (lisp_get_val(if_node->child1->list) == 1);
     #endif
     if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(program_log, "Expecting closing parenthesis after bool function in if statement\n");
@@ -224,7 +233,8 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         if (execution_state && execute) {
             *current = loop_start;
             free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
-            loop = handle_loop(current, program_log);
+            loop = handle_LOOP(current, program_log);
+            program_log->executing = execution_state;
         }
     #endif
     return loop;
@@ -248,7 +258,7 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log) {
         list_function->child2 = handle_LIST(current, program_log);
     }
     #ifdef INTERP
-        list_function->list = evaluate_list_function(type, list_function->child1, list_function->child2);
+        list_function->list = evaluate_list_function(type, list_function->child1->list, list_function->child2->list);
     #endif
     return list_function;
 }
@@ -258,7 +268,7 @@ Lisp* evaluate_list_function(token_type type, Lisp* arg1, Lisp* arg2) {
         return lisp_car(arg1);
     } else if (type == t_CDR) {
         return lisp_cdr(arg1);
-    } else if (type == t_CONS) {
+    } else {
         return lisp_cons(arg1, arg2);
     }
 }
@@ -283,9 +293,9 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log) {
     }
     #ifdef INTERP
         if (type == t_plus) {
-            int_function->list = evaluate_plus(int_function->child1, int_function->child2);
+            int_function->list = evaluate_plus(int_function->child1->list, int_function->child2->list, program_log);
         } else {
-            int_function->list = evaluate_length(int_function->child2);
+            int_function->list = evaluate_length(int_function->child2->list);
         }
     #endif
     return int_function;
@@ -323,7 +333,7 @@ Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* program_log) {
         bool_function->child2 = handle_LIST(current, program_log);
     }
     #ifdef INTERP
-        bool evaluates = evaluate_bool(type, bool_function->child1, bool_function->child2, program_log);
+        bool evaluates = evaluate_bool(type, bool_function->child1->list, bool_function->child2->list, program_log);
         bool_function->list = (evaluates) ? lisp_atom(1) : lisp_atom(0);
     #endif
     return bool_function;
@@ -338,11 +348,11 @@ bool evaluate_bool(token_type type, Lisp* arg1, Lisp* arg2, Prog_log* log) {
     int val1 = lisp_get_val(arg1);
     int val2 = lisp_get_val(arg2);
     if (type == t_less) {
-        return (arg1 < arg2);
+        return (val1 < val2);
     } else if (type == t_equal) {
-        return (arg1 == arg2);
+        return (val1 == val2);
     } else {
-        return (arg1 < arg2);
+        return (val1 < val2);
     }
 }
 
@@ -352,21 +362,21 @@ Tree_node* handle_LIST(Token_node** current, Prog_log* program_log) {
     if (type == t_variable) {
         list->child1 = handle_VAR(current, program_log);
         #ifdef INTERP
-            list->list = program_log->variables[child1->var_name - 'A'];
+            list->list = program_log->variables[list->child1->var_name - 'A'];
         #endif
     } else if (type == t_literal) {
         list->child1 = handle_LITERAL(current, program_log);
-        #ifdef
+        #ifdef INTERP
             list->list = list->child1->list;
         #endif
     } else if (type == t_nil) {
         list->child1 = handle_NIL(current, program_log);
-        #ifdef
+        #ifdef INTERP
             list->list = NULL;
         #endif
     } else if (next_token_is(current, 1, t_l_parenthesis)) {
         list->child1 = handle_RETFUNC(current, program_log);
-        #ifdef
+        #ifdef INTERP
             list->list = list->child1->list;
         #endif
         if (!next_token_is(current, 1, t_r_parenthesis)) {
@@ -431,17 +441,17 @@ Tree_node* handle_PRINT(Token_node** current, Prog_log* program_log) {
         print->child1 = handle_STRING(current, program_log);
         #ifdef INTERP
             if (program_log->executing) {
-                fprintf("%s", (*current)->value->lexeme);
+                printf("%s", (*current)->value->lexeme);
             }
         #endif
     } else if (is_LIST(*current)) {
         print->child1 = handle_LIST(current, program_log);
         #ifdef INTERP
             if (program_log->executing) {
-                char* string_to_print[MAXSTR];
-                lisp_to_string(print->child1->list);
+                char string_to_print[MAXSTR];
+                lisp_to_string(print->child1->list, string_to_print);
+                printf("%s\n", string_to_print);
             }
-            fprintf("%s", string_to_print);
         #endif
     }
     return print;
@@ -588,19 +598,6 @@ void free_node(Tree_node* node) {
     free(node);
 }
 
-void throw_error(const char* error_message) {
-    fputs(error_message, stderr);
-    exit(EXIT_FAILURE);
-}
-
-void* allocate_space(int num, int size) {
-    void* pointer = calloc(num, size);
-    if (!pointer) {
-        throw_error("ERROR: unable to allocate space\n");
-    }
-    return pointer;
-}
-
 void print_log(Prog_log* log) {
     if (log->num_errors > 0) {
         fprintf(stderr, "ERROR LOG:\n");
@@ -612,6 +609,16 @@ void print_log(Prog_log* log) {
     if (log->overflow) {
         fprintf(stderr, "More than 20 parsing errors.  Not printing any more.\n");
     }
+}
+
+void free_log(Prog_log* log) {
+    for (int i = 0; i < log->num_errors; i++) {
+        free(log->errors[i]);
+    }
+    for (int j = 0; j < NUMVARS; j++) {
+        lisp_free(&(log->variables[j]));
+    }
+    free(log);
 }
 
 void add_error(Prog_log* program_log, char* error_message) {

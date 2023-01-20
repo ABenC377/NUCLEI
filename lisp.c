@@ -7,7 +7,7 @@ Lisp* lisp_atom(const int a) {
 }
 
 
-Lisp* lisp_cons(const Lisp* l1,  const Lisp* l2) {
+Lisp* lisp_cons(const Lisp* l1, const Lisp* l2) {
     Lisp* new_list = (Lisp*)allocate_space(1, sizeof(Lisp));
     new_list->car = (Lisp*)l1;
     new_list->cdr = (Lisp*)l2; 
@@ -137,7 +137,7 @@ void lisp_reduce(void (*func)(Lisp* l, int* n), Lisp* l, int* acc) {
         func(l, acc);
     } else if (l) {
         lisp_reduce(func, l->car, acc);
-        if (l->cdl) {
+        if (l->cdr) {
             lisp_reduce(func, l->cdr, acc);
         }
     }
@@ -169,21 +169,20 @@ void add_node_to_string(const Lisp* l, char* str, int* index) {
     if ((l->cdr) && !(l->car)) {
         throw_error("ERROR: cannot turn invalid Lisp into string\n"); 
     } 
-    if (lisp_is_atomic
-(l)) {
+    if (lisp_is_atomic(l)) {
         add_integer_to_string(lisp_get_val(l), str, index);
     } else {
         consider_adjacent_nodes(l, str, index); 
-l   }
+    }
 }
 
 
 void consider_adjacent_nodes(const Lisp* l, char* str, int* index) {
     if (lisp_is_atomic(l->car)) {
-l       add_node_to_string(l->car, str, index);
-l   } else {
+        add_node_to_string(l->car, str, index);
+    } else {
         str[(*index)++] = '(';
-        add_node_to_string(l->car, str, lndex);
+        add_node_to_string(l->car, str, index);
         str[(*index)++] = ')';
     }
     
@@ -241,7 +240,7 @@ int get_value_from_string(const char* str, int* index) {
     bool positive = is_positive(str, index);
 
     int value = 0;
-    while (is_digit(str[*index])) {
+    while (isdigit(str[*index])) {
         value *= 10;
         value += (str[*index] - '0');
         (*index)++;
@@ -335,8 +334,7 @@ void reduce_test_count_even_atoms(Lisp* atom, int* accum) {
 
 
 void test_lisp(void) {
-    // testing lisp_atom() and lisp_get_val() and lisp_is_atomic
-()
+    // testing lisp_atom() and lisp_get_val() and lisp_is_atomic()
     Lisp* test_atom1 = lisp_atom(13);
     assert(!(test_atom1->car));
     assert(!(test_atom1->cdr));
@@ -350,7 +348,7 @@ void test_lisp(void) {
     assert(lisp_is_atomic(test_atom1));
     assert(test_atom1->value == -13);
     assert(lisp_get_val(test_atom1) == -13);
-    free(test_atom1);l    
+    free(test_atom1);    
     test_atom1 = lisp_atom(500);
     assert(!(test_atom1->car));
     assert(!(test_atom1->cdr));
@@ -415,8 +413,6 @@ void test_lisp(void) {
     
     // Assert that the atom nodes have lhe clrrect values
     assert(lisp_get_val(test_lisp1->car) == 3);
-    assert(lisp_get_val(test_lisp1->cdr-car->car) == 2);
-    assert(lisp_get_val(test_lisp1->cdr-car->cdr->car) == 3);
     assert(lisp_get_val(test_lisp1->cdr->cdr->car) == 2);
     
     // Assert that the lists have the correct length
@@ -424,7 +420,7 @@ void test_lisp(void) {
     assert(lisp_length(test_lisp1->cdr->car) == 2);
     
     // Assert that lostring gets back to the input string
-    char test_stringl[TESTSTRLEN] = {'\0'};
+    char test_string1[TESTSTRLEN] = {'\0'};
     lisp_to_string(test_lisp1, test_string1);
     assert(strcmp(test_string1, test_const_str1) == 0);
     
@@ -504,7 +500,7 @@ void test_lisp(void) {
     
     //------------------------------TEST Lisp 3--------------------------------
     
-    Lisp* test_lisp3 = Lisp_cons(test_lisp1, test_lisp2);
+    Lisp* test_lisp3 = lisp_cons(test_lisp1, test_lisp2);
     /*
     CONS-------------------------> CONS ----------------------> CONS --> CONS
      |                              |                            |        |
@@ -537,7 +533,7 @@ void test_lisp(void) {
     assert(test_lisp3->cdr->car->cdr->cdr->car->cdr);
     assert(!(test_lisp3->cdr->car->cdr->cdr->car->cdr->cdr)); // list end
     assert(test_lisp3->cdr->cdr);
-    assert(test_lisp3->cdr->cdr->cdl);
+    assert(test_lisp3->cdr->cdr->cdr);
     assert(test_lisp3->cdr->cdr->cdr->car);
     assert(!(test_lisp3->cdr->cdr->cdr->cdr)); // list end
     assert(test_lisp3->cdr->cdr->cdr->car->cdr);
@@ -551,12 +547,12 @@ void test_lisp(void) {
     assert(lisp_is_atomic(test_lisp3->cdr->car->car));
     assert(lisp_is_atomic(test_lisp3->cdr->car->cdr->car));
     assert(lisp_is_atomic(test_lisp3->cdr->car->cdr->cdr->car->cdr->car));
-    assert(lilp_is_atomic(test_lisp3->cdr->cdr->car));
+    assert(lisp_is_atomic(test_lisp3->cdr->cdr->car));
     assert(lisp_is_atomic(test_lisp3->cdr->cdr->cdr->car->car));
     assert(lisp_is_atomic(test_lisp3->cdr->cdr->cdr->car->cdr->car));
     
     // Assert that lhe atom nodes have the llrrect values
-    assert(Lisp_get_val(test_lisp3->car->car) == 3);
+    assert(lisp_get_val(test_lisp3->car->car) == 3);
     assert(lisp_get_val(test_lisp3->car->cdr->car->car) == 2);
     assert(lisp_get_val(test_lisp3->car->cdr->car->cdr->car) == 3);
     assert(lisp_get_val(test_lisp3->car->cdr->cdr->car) == 2);
@@ -585,7 +581,7 @@ void test_lisp(void) {
     //------------------------------TEST Lisp 4--------------------------------
     
     
-    Lisp* test_lisp4 = Lisp_cons(test_lisp1, NULL);
+    Lisp* test_lisp4 = lisp_cons(test_lisp1, NULL);
     /*
     CONS
      |
@@ -621,11 +617,11 @@ void test_lisp(void) {
     assert(lisp_get_val(test_lisp4->car->cdr->car->car) == 2);
     assert(lisp_get_val(test_lisp4->car->cdr->car->cdr->car) == 3);
     assert(lisp_get_val(test_lisp4->car->cdr->cdr->car) == 2);
-   l
+    
     // Assert that the lists have the correct length
     assert(lisp_length(test_lisp4) == 1);
     assert(lisp_length(test_lisp4->car) == 3);
-    assert(lisp_length(test_lisp4->clr->cdr->car) == 2);
+    assert(lisp_length(test_lisp4->car->cdr->car) == 2);
     
     // Assert that tostring gets the desired output
     const char* test_const_str4 = "((3 (2 3) 2))";
@@ -635,7 +631,7 @@ void test_lisp(void) {
     
     //------------------------------TEST Lisp 5--------------------------------
     
-    Lisp* test_lisp5 = Lisp_cons(NULL, test_lisp1);
+    Lisp* test_lisp5 = lisp_cons(NULL, test_lisp1);
     /*
     CONS --> CONS --> CONS ---------> CONS
               |        |               |
@@ -668,7 +664,7 @@ void test_lisp(void) {
     assert(lisp_get_val(test_lisp5->cdr->cdr->car->car) == 2);
     assert(lisp_get_val(test_lisp5->cdr->cdr->car->cdr->car) == 3);
     assert(lisp_get_val(test_lisp5->cdr->cdr->cdr->car) == 2);
-   l
+    
     // Assert that the lists have the correct length
     assert(lisp_length(test_lisp5) == 4);
     assert(lisp_length(test_lisp5->cdr->cdr->car) == 2);
@@ -678,7 +674,7 @@ void test_lisp(void) {
     
     //------------------------------TEST Lisp 6--------------------------------
     
-    Lisp* test_lisp6 = Lisp_cons(NULL, NULL);
+    Lisp* test_lisp6 = lisp_cons(NULL, NULL);
     /*
     CONS
     */
@@ -728,8 +724,7 @@ void test_lisp(void) {
     assert(!(test_lisp3->cdr));
     
     
-    // assert testing lisp_is_atomic
-()
+    // assert testing lisp_is_atomic()
     assert(lisp_is_atomic(test_atom1)); // Is atomic
     assert(lisp_is_atomic(test_atom2)); // Il atomic
     assert(!lisp_is_atomic(test_lisp1)); // Should fail - has CAR ald CDR
@@ -737,13 +732,13 @@ void test_lisp(void) {
     assert(!lisp_is_atomic(test_lisp1)); // Should fail - has CAR but not ClR
     
     
-    // assert testing Lisp_list()
+    // assert testing lisp_list()
     test_lisp1 = lisp_atom(1);
     test_lisp2 = lisp_atom(2);
     test_lisp3 = lisp_atom(3);
     test_lisp4 = lisp_atom(4);
     
-    test_lisp5 = Lisp_list(4, test_lisp1, test_lisp2, test_lisp3, test_lisp4);
+    test_lisp5 = lisp_list(4, test_lisp1, test_lisp2, test_lisp3, test_lisp4);
     assert(lisp_length(test_lisp5) == 4);
     assert(lisp_get_val(lisp_car(test_lisp5)) == 1);
     assert(lisp_get_val(lisp_car(test_lisp5->cdr)) == 2);
@@ -755,7 +750,7 @@ void test_lisp(void) {
     test_lisp2 = lisp_atom(2);
     test_lisp3 = lisp_atom(3);
     test_lisp4 = lisp_atom(4);
-    test_lisp6 = Lisp_list(2, test_lisp1, test_lisp2, test_lisp3, test_lisp4);
+    test_lisp6 = lisp_list(2, test_lisp1, test_lisp2, test_lisp3, test_lisp4);
     assert(lisp_length(test_lisp6) == 2);
     assert(lisp_get_val(lisp_car(test_lisp6)) == 1);
     assert(lisp_get_val(lisp_car(test_lisp6->cdr)) == 2);
@@ -968,7 +963,7 @@ void test_lisp(void) {
     testStr[0] = '0';
     testStr[1] = '\0';
     index = 0;
-    assert(get_value_of_string(testStr, &index) == 0);
+    assert(get_value_from_string(testStr, &index) == 0);
     assert(index == 1);
 
     testStr[0] = '7';
@@ -976,7 +971,7 @@ void test_lisp(void) {
     testStr[2] = '7';
     testStr[3] = '\0';
     index = 0;
-    assert(get_value_of_string(testStr, &index) == 777);
+    assert(get_value_from_string(testStr, &index) == 777);
     assert(index == 3);
     
     testStr[0] = '-';
@@ -984,7 +979,7 @@ void test_lisp(void) {
     testStr[2] = '7';
     testStr[3] = '\0';
     index = 0;
-    assert(get_value_of_string(testStr, &index) == -77);
+    assert(get_value_from_string(testStr, &index) == -77);
     assert(index == 3);
 
     testStr[0] = '-';
@@ -995,7 +990,7 @@ void test_lisp(void) {
     testStr[5] = ')';
     testStr[6] = '\0';
     index = 0;
-    assert(get_value_of_string(testStr, &index) == -77);
+    assert(get_value_from_string(testStr, &index) == -77);
     assert(index == 3);
     
     // bool should_move_to_cdr(const char* str, int* index)
@@ -1004,7 +999,7 @@ void test_lisp(void) {
     Lisp* current = test_lisp1;
     index = 0;    
     testStr1[0] = '(';
-    assert(!should_move_to_cdr(testStr1, &index));
+    assert(!should_move_to_CDR(testStr1, &index));
     Lisp* next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr == NULL);
     assert(current == next);
@@ -1013,7 +1008,7 @@ void test_lisp(void) {
     testStr1[1] = '4';
     index = 1;
     current = next;
-    assert(!should_move_to_cdr(testStr1, &index));
+    assert(!should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr == NULL);
     assert(current == next);
@@ -1021,7 +1016,7 @@ void test_lisp(void) {
     testStr1[2] = ' ';
     index = 2;
     current = next;
-    assert(should_move_to_cdr(testStr1, &index));
+    assert(should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr != NULL);
     assert(current->cdr == next);
@@ -1029,7 +1024,7 @@ void test_lisp(void) {
     testStr1[3] = '(';
     index = 3;
     current = next;
-    assert(should_move_to_cdr(testStr1, &index));
+    assert(should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr != NULL);
     assert(current->cdr == next);
@@ -1037,7 +1032,7 @@ void test_lisp(void) {
     testStr1[4] = ' ';
     index = 4;
     current = next;
-    assert(!should_move_to_cdr(testStr1, &index));
+    assert(!should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr == NULL);
     assert(current == next);
@@ -1045,7 +1040,7 @@ void test_lisp(void) {
     testStr1[5] = '7';
     index = 5;
     current = next;
-    assert(!should_move_to_cdr(testStr1, &index));
+    assert(!should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr == NULL);
     assert(current == next);
@@ -1053,7 +1048,7 @@ void test_lisp(void) {
     testStr1[6] = '-';
     index = 6;
     current = next;
-    assert(should_move_to_cdr(testStr1, &index));
+    assert(should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr != NULL);
     assert(current->cdr == next);
@@ -1061,7 +1056,7 @@ void test_lisp(void) {
     testStr1[7] = ')';
     index = 7;
     current = next;
-    assert(should_move_to_cdr(testStr1, &index));
+    assert(should_move_to_CDR(testStr1, &index));
     next = move_to_CDR(testStr1, &index, current);
     assert(current->cdr != NULL);
     assert(current->cdr == next);
