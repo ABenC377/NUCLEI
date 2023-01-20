@@ -25,20 +25,15 @@ void parse_list(Token_list* list) {
     Prog_log* program_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
     program_log->executing = true;
     tree->program = descend_recursively(&current, program_log);
-    if (!(program_log->parser_error)) {
-        printf("Parsed OK\n");
-    } else {
-        printf("Not parsed correctly\n");
-        print_log(program_log);
-    }
     #ifdef INTERP
         if (program_log->interp_error) {
             printf("Interpreter failed.\n");
-            if (!(program_log->parser_error)) {
-                print_log(program_log);
-            }
         }
     #endif
+    printf((program_log->parser_error) ? "Not parsed correctly\n" : "Parsed OK\n");
+    if (program_log->parser_error || program_log->interp_error) {
+        print_log(program_log);
+    }
     free_tree(tree);
     free(program_log);
 }
@@ -54,10 +49,9 @@ Tree_node* descend_recursively(Token_node** current, Prog_log* program_log) {
 }
 
 Tree_node* handle_INSTRCTS(Token_node** current, Prog_log* program_log) {
-    if ((*current) == NULL) {
+    if (!(*current)) {
         return parser_fails(program_log, "Expecting further instructions\n");
-    }
-    if (next_token_is(current, 1, t_r_parenthesis)) {
+    } else if (next_token_is(current, 1, t_r_parenthesis)) {
         return NULL;
     } else {
         Tree_node* instructions = make_node(INSTRCTS);
@@ -72,7 +66,7 @@ Tree_node* handle_INSTRCTS(Token_node** current, Prog_log* program_log) {
 
 Tree_node* handle_INSTRCT(Token_node** current, Prog_log* program_log) {
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, "Incorrectly formed instruction\n");
+        return parser_fails(program_log, "Expecting opening parenthesis to begin function\n");
     }
     Tree_node* instruction = make_node(INSTRCT);
     instruction->child1 = handle_FUNC(current, program_log);

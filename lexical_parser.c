@@ -52,13 +52,28 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             break;
         case s_in_literal:
         case s_in_string:
-            handle_s_in_state(tokens, automata, c);
+            handle_string_literal(tokens, automata, c);
             break;
         case s_in_invalid:
             handle_s_invalid(tokens, automata, c);
             break;
         case s_in_variable:
             handle_s_variable(tokens, automata, c);
+            break;
+        case s_NIL:
+        case s_WHILE:
+        case s_IF:
+        case s_PRINT:
+        case s_PLUS:
+        case s_SET:
+        case s_LESS:
+        case s_LENGTH:
+        case s_GREATER:
+        case s_EQUAL:
+        case s_CAR:
+        case s_CDR:
+        case s_CONS:
+            check_end_of_token(tokens, automata, (token_type)automata->state, c);
             break;
         case s_N:
             if (c == 'I') {
@@ -73,9 +88,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else {
                 handle_s_invalid(tokens, automata, c);
             }
-            break;
-        case s_NIL:
-            check_end_of_token(tokens, automata, t_nil, c);
             break;
         case s_W:
             if (c == 'H') {
@@ -105,18 +117,12 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_WHILE:
-            check_end_of_token(tokens, automata, t_while, c);
-            break;
         case s_I:
             if (c == 'F') {
                 automata->state = s_IF;
             } else {
                 check_for_var(tokens, automata, 'I', c);
             }
-            break;
-        case s_IF:
-            check_end_of_token(tokens, automata, t_if, c);
             break;
         case s_P:
             if (c == 'R') {
@@ -148,9 +154,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_PRINT:
-            check_end_of_token(tokens, automata, t_print, c);
-            break;
         case s_PL:
             if (c == 'U') {
                 automata->state = s_PLU;
@@ -165,9 +168,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_PLUS:
-            check_end_of_token(tokens, automata, t_plus, c);
-            break;
         case s_S:
             if (c == 'E') {
                 automata->state = s_SE;
@@ -181,9 +181,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else {
                 handle_s_invalid(tokens, automata, c);
             }
-            break;
-        case s_SET:
-            check_end_of_token(tokens, automata, t_set, c);
             break;
         case s_L:
             if (c == 'E') {
@@ -208,9 +205,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_LESS:
-            check_end_of_token(tokens, automata, t_less, c);
-            break;
         case s_LEN:
             if (c == 'G') {
                 automata->state = s_LENG;
@@ -231,9 +225,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else {
                 handle_s_invalid(tokens, automata, c);
             }
-            break;
-        case s_LENGTH:
-            check_end_of_token(tokens, automata, t_length, c);
             break;
         case s_G:
             if (c == 'R') {
@@ -277,9 +268,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_GREATER:
-            check_end_of_token(tokens, automata, t_greater, c);
-            break;
         case s_E:
             if (c == 'Q') {
                 automata->state = s_EQ;
@@ -308,9 +296,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_EQUAL:
-            check_end_of_token(tokens, automata, t_equal, c);
-            break;
         case s_C:
             if (c == 'A') {
                 automata->state = s_CA;
@@ -329,18 +314,12 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
                 handle_s_invalid(tokens, automata, c);
             }
             break;
-        case s_CAR:
-            check_end_of_token(tokens, automata, t_CAR, c);
-            break;
         case s_CD:
             if (c == 'R') {
                 automata->state = s_CDR;
             } else {
                 handle_s_invalid(tokens, automata, c);
             }
-            break;
-        case s_CDR:
-            check_end_of_token(tokens, automata, t_CDR, c);
             break;
         case s_CO:
             if (c == 'N') {
@@ -355,9 +334,6 @@ void update_tokens(Token_list* tokens, Automata* automata, char c) {
             } else {
                 handle_s_invalid(tokens, automata, c);
             }
-            break;
-        case s_CONS:
-            check_end_of_token(tokens, automata, t_CONS, c);
             break;
     }
 }
@@ -374,7 +350,6 @@ void add_variable(Token_list* tokens, Automata* automata, char name) {
     add_token(tokens, new_token);
 }
 
-// This only works for token types that do not have a lexeme or other value
 void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type) {
     automata->state = s_start;
     Token* new_token = (Token*)allocate_space(1, sizeof(Token));
@@ -386,47 +361,50 @@ void handle_s_start(Token_list* tokens, Automata* automata, char c) {
     if (!is_white_space(c)) {
         switch (c) {
             case ')':
-                make_and_add_simple_token(tokens, automata, t_r_parenthesis);
-                break;
             case '(':
-                make_and_add_simple_token(tokens, automata, t_l_parenthesis);
+                make_and_add_simple_token(tokens, automata, c);
                 break;
             case SINGLEQUOTE:
-                start_literal(automata);
-                break;
             case '"':
-                start_string(automata);
+                start_lexeme(automata, c);
                 break;
             case 'A'...'Z':
-                if (c == 'C' || c == 'E' || c == 'G' || c == 'I' || c == 'L' || c == 'N' || c == 'P' || c == 'S' || c == 'W') {
-                    automata->state = c;
-                } else {
-                    automata->token = (Token*)allocate_space(1, sizeof(Token));
-                    automata->token->type = t_variable;
-                    automata->token->var_name = c;
-                    automata->state = s_in_variable;
-                }
+                start_word(automata, c);
                 break;
             default:
                 handle_s_invalid(tokens, automata, c);
                 break;
         }
     }
-    
 }
 
-void start_literal(Automata* automata) {
-    automata->token = (Token*)allocate_space(1, sizeof(Token));
-    automata->token->type = t_literal;
-    automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-    automata->state = s_in_literal;
+void start_word(Automata* automata, char c) {
+    if  (is_start_of_reserved_word(c)) {
+        automata->state = c;
+    } else {
+        start_variable(automata, c);
+    }
 }
 
-void start_string(Automata* automata) {
+bool is_start_of_reserved_word(char c) {
+    bool CDG = (c == 'C' || c == 'E' || c == 'G');
+    bool ILN = (c == 'I' || c == 'L' || c == 'N');
+    bool PSW = (c == 'P' || c == 'S' || c == 'W');
+    return (CDG || ILN || PSW);
+}
+
+void start_variable(Automata* automata, char c) {
     automata->token = (Token*)allocate_space(1, sizeof(Token));
-    automata->token->type = t_string;
+    automata->token->type = t_variable;
+    automata->token->var_name = c;
+    automata->state = s_in_variable;
+}
+
+void start_lexeme(Automata* automata, char c) {
+    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    automata->token->type = (c == '"') ? t_string : t_literal;
     automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
-    automata->state = s_in_string;
+    automata->state = (c == '"') ? s_in_string : s_in_literal;
 }
 
 void check_for_var(Token_list* tokens, Automata* automata, char name, char c) {
@@ -452,7 +430,7 @@ void check_end_of_token(Token_list* tokens, Automata* automata, token_type type,
 }
 
 
-void handle_s_in_state(Token_list* tokens, Automata* automata, char c) {
+void handle_string_literal(Token_list* tokens, Automata* automata, char c) {
     if ((automata->state == s_in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
         automata->state = s_start;
