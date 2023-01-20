@@ -617,6 +617,9 @@ void handle_variable(Token_list* tokens, Automata* automata, char c) {
     if (is_white_space(c)) {
         add_token(tokens, automata->token);
         automata->state = s_start;
+    } else if (c == ')') {
+        add_variable(tokens, automata, c);
+        make_and_add_simple_token(tokens, automata, t_r_parenthesis);
     } else {
         automata->token->type = t_invalid;
         automata->state = s_in_invalid;
