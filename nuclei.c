@@ -150,17 +150,38 @@ Tree_node* handle_IF(Token_node** current, Prog_log* program_log) {
         return parser_fails(program_log, "Expecting opening parenthesis before bool function in if statement\n");
     }
     if_node->child1 = handle_BOOLFUNC(current, program_log);
+    #ifdef INTERP
+        bool execution_state = program_log->executing;
+        bool execute = (lisp_get_val(loop->child1->list) == 1);
+    #endif
     if (!next_token_is(current, 1, t_r_parenthesis)) {
         return parser_fails(program_log, "Expecting closing parenthesis after bool function in if statement\n");
     }
     if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(program_log, "Expecting opening parenthesis before first instructions in if statement\n");
     }
+    #ifdef INTERP
+        if (execution_state == true && execute == true) {
+            program_log->executing = true;
+        } else {
+            program_log->executing = false;
+        }
+    #endif
     if_node->child2 = handle_INSTRCTS(current, program_log);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
         return parser_fails(program_log, "Expecting opening parenthesis before second instructions in if statement\n");
     }
+    #ifdef INTERP
+        if (execution_state == true && execute == false) {
+            program_log->executing = true;
+        } else {
+            program_log->executing = false;
+        }
+    #endif 
     if_node->child3 = handle_INSTRCTS(current, program_log);
+    #ifdef INTERP
+        program_log->executing = execution_state;
+    #endif 
     return if_node;
 }
 
@@ -202,6 +223,7 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         }
         if (execution_state && execute) {
             *current = loop_start;
+            free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
             loop = handle_loop(current, program_log);
         }
     #endif
