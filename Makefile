@@ -5,7 +5,7 @@
 # set in the gcc/clang statement using -DINTERP
 # In this way ./parse & ./interp can both be built from the same source file.
 
-CC      := gcc
+CC      := clang
 CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 
 DEBUG   := $(CFLAGS) -g3 -fsanitize=undefined -fsanitize=address
 VFLAGS  := $(CFLAGS) -g3
@@ -40,10 +40,10 @@ extension_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp
 extension_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
 	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_iv -DINTERP -DEXT $(VFLAGS)	
 
-zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	zip -nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
+	zip nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
 
-run: nuclei_pd
+run: nuclei_pd nuclei_id
 	./nuclei_pd test_code/basic_print.ncl
 	./nuclei_pd test_code/demo1.ncl
 	./nuclei_pd test_code/demo2.ncl
@@ -67,4 +67,3 @@ run: nuclei_pd
 	./nuclei_id test_code/simple_loop.ncl
 	./nuclei_id test_code/test.ncl
 	./nuclei_id test_code/triv.ncl
-	
