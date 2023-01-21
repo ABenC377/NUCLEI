@@ -29,14 +29,15 @@ void parse_list(Token_list* list) {
         printf("Interpreter failed\n");
     }
     #endif
-    printf((program_log->parser_error) ? "Not parsed correctly (run extension to see more detail)\n" : "Parsed OK\n");
     #ifdef EXT
+    printf((program_log->parser_error) ? "Not parsed correctly\n" : "Parsed OK\n");
     if (program_log->parser_error || program_log->interp_error) {
         print_log(program_log);
     }
+    #else
+    printf((program_log->parser_error) ? "Not parsed correctly (run extension to see more detail)\n" : "Parsed OK\n");
     #endif
-    free_tree(tree);
-    free_log(program_log);
+    free_tree(tree); free_log(program_log);
 }
 
 Tree_node* descend_recursively(Token_node** current, Prog_log* program_log) {
@@ -67,12 +68,14 @@ Tree_node* handle_INSTRCTS(Token_node** current, Prog_log* program_log) {
 
 Tree_node* handle_INSTRCT(Token_node** current, Prog_log* program_log) {
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, (*current)->value, "Expecting opening parenthesis to begin function\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting opening parenthesis to begin function\n");
     }
     Tree_node* instruction = make_node(INSTRCT);
     instruction->child1 = handle_FUNC(current, program_log);
     if (!next_token_is(current, 1, t_r_parenthesis)) {
-        return parser_fails(program_log, (*current)->value, "Expecting closing parenthesis after function in instruction\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting closing parenthesis after function in instruction\n");
     }
     return instruction;
 }
@@ -88,7 +91,8 @@ Tree_node* handle_FUNC(Token_node** current, Prog_log* program_log) {
     } else if (is_LOOP(*current)) {
         function->child1 = handle_LOOP(current, program_log);
     } else {
-        return parser_fails(program_log, (*current)->value, "Expecting function in instruction\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting function in instruction\n");
     }
     return function;
 }
@@ -106,7 +110,8 @@ Tree_node* handle_RETFUNC(Token_node** current, Prog_log* program_log) {
     } else if (is_BOOLFUNC(*current)) {
         ret_function->child1 = handle_BOOLFUNC(current, program_log);
     } else {
-        return parser_fails(program_log, (*current)->value, "Expecting list, int, or bool function in return function\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting list, int, or bool function in return function\n");
     }
     #ifdef INTERP
     if (program_log->executing) {
@@ -129,7 +134,8 @@ Tree_node* handle_IOFUNC(Token_node** current, Prog_log* program_log) {
     } else if ((*current)->value->type == t_print) {
         io_function->child1 = handle_PRINT(current, program_log);
     } else {
-        return parser_fails(program_log, (*current)->value, "Expecting 'SET' or 'PRINT' in I/O function\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting 'SET' or 'PRINT' in I/O function\n");
     }
     return io_function;
 }
@@ -137,7 +143,8 @@ Tree_node* handle_IOFUNC(Token_node** current, Prog_log* program_log) {
 Tree_node* handle_SET(Token_node** current, Prog_log* program_log) {
     Tree_node* set = make_node(SET);
     if (!next_token_is(current, 1, t_set)) {
-        return parser_fails(program_log, (*current)->value, "Expecting 'SET' in set statement\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting 'SET' in set statement\n");
     } else {
         set->child1 = handle_VAR(current, program_log);
         set->child2 = handle_LIST(current, program_log);
