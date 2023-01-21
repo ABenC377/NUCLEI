@@ -575,7 +575,6 @@ void free_token_node(Token_node* node) {
     if (node) {
         if (node->next) {
             free_token_node(node->next);
-            node->next = NULL;
         }
         free(node);
     }
