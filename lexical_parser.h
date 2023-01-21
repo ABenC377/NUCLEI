@@ -51,6 +51,8 @@ typedef struct {
     token_type type;
     char* lexeme;
     char var_name;
+    int line;
+    int col;
 } Token;
 
 typedef struct Token_node {
@@ -67,6 +69,8 @@ typedef struct Token_list {
 typedef struct {
     automata_state state;
     Token* token;
+    int line;
+    int col;
 } Automata;
 
 Token_list* run_lexical_analyser(int argc, char* argv[]);

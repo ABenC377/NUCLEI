@@ -26,11 +26,12 @@ char* get_file_name(int argc, char* argv[]) {
         }
     }
     return NULL;
-}
+} 
 
 Token_list* get_tokens_from_file(FILE* fp) {
     Token_list* tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Automata* automata = (Automata*)allocate_space(1, sizeof(Automata));
+    automata->line = 1; automata->col = 1;
     char c = (char)fgetc(fp);
     bool in_comment = false;
     while (c != EOF) {
@@ -40,6 +41,12 @@ Token_list* get_tokens_from_file(FILE* fp) {
             update_tokens(tokens, automata, c);
         }
         c = (char)fgetc(fp);
+        if (c == '\n' || c == '\r') {
+            (automata->line)++;
+            automata->col = 0;
+        } else {
+            (automata->col)++;
+        }
     }
     free(automata);
     return tokens;
@@ -346,6 +353,8 @@ void add_variable(Token_list* tokens, Automata* automata, char name) {
     automata->state = s_start;
     if (!(automata->token)) {
         automata->token = (Token*)allocate_space(1, sizeof(Token));
+        automata->token->line = automata->line;
+        automata->token->col = automata->col;
     }
     automata->token->type = t_variable;
     automata->token->var_name = name;
@@ -357,6 +366,8 @@ void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_typ
     automata->state = s_start;
     if (!(automata->token)) {
         automata->token = (Token*)allocate_space(1, sizeof(Token));
+        automata->token->line = automata->line;
+        automata->token->col = automata->col;
     }
     automata->token->type = type;
     add_token(tokens, automata->token);
@@ -402,6 +413,8 @@ bool is_start_of_reserved_word(char c) {
 void start_variable(Automata* automata, char c) {
     if (!(automata->token)) {
         automata->token = (Token*)allocate_space(1, sizeof(Token));
+        automata->token->line = automata->line;
+        automata->token->col = automata->col;
     }
     automata->token->type = t_variable;
     automata->token->var_name = c;
@@ -411,6 +424,8 @@ void start_variable(Automata* automata, char c) {
 void start_lexeme(Automata* automata, char c) {
     if (!(automata->token)) {
         automata->token = (Token*)allocate_space(1, sizeof(Token));
+        automata->token->line = automata->line;
+        automata->token->col = automata->col;
     }
     automata->token->type = (c == '"') ? t_string : t_literal;
     automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));

@@ -53,10 +53,16 @@ typedef struct {
 } Syntax_tree;
 
 typedef struct {
+    char* message;
+    int line;
+    int col;
+} Error;
+
+typedef struct {
     bool parser_error;
     bool interp_error;
     int num_errors;
-    char* errors[MAXERR];
+    Error* errors[MAXERR];
     bool overflow;
     Lisp* variables[NUMVARS];
     bool executing;
@@ -82,11 +88,11 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log);
 Lisp* evaluate_list_function(token_type type, Lisp* arg1, Lisp* arg2);
 bool is_INTFUNC(Token_node* current);
 Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log);
-Lisp* evaluate_plus(Lisp* arg1, Lisp* arg2, Prog_log* log);
+Lisp* evaluate_plus(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log);
 Lisp* evaluate_length(Lisp* arg);
 bool is_BOOLFUNC(Token_node* current);
 Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* program_log);
-bool evaluate_bool(token_type type, Lisp* arg1, Lisp* arg2, Prog_log* log);
+bool evaluate_bool(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log);
 Tree_node* handle_LIST(Token_node** current, Prog_log* program_log);
 Tree_node* handle_VAR(Token_node** current, Prog_log* program_log);
 Tree_node* handle_LITERAL(Token_node** current, Prog_log* program_log);
@@ -95,7 +101,7 @@ Tree_node* handle_PRINT(Token_node** current, Prog_log* program_log);
 bool is_LIST(Token_node* current);
 Tree_node* handle_STRING(Token_node** current, Prog_log* program_log);
 Tree_node* make_node(grammar_type type);
-Tree_node* parser_fails(Prog_log* program_log, char* error_message);
+Tree_node* parser_fails(Prog_log* program_log, Token* token, char* error_message);
 bool next_token_is(Token_node** current, int num_possible_tokens, ...);
 void print_tree(Syntax_tree* tree);
 void print_tree_node(Tree_node* node);
@@ -104,6 +110,6 @@ void free_tree(Syntax_tree* tree);
 void free_node(Tree_node* node);
 void print_log(Prog_log* log);
 void free_log(Prog_log* log);
-void add_error(Prog_log* program_log, char* error_message, bool parsing);
+void add_error(Prog_log* log, Error* error, bool parsing);
 void test(void);
 void parse_test(void);

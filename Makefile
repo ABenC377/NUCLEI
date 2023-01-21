@@ -5,7 +5,7 @@
 # set in the gcc/clang statement using -DINTERP
 # In this way ./parse & ./interp can both be built from the same source file.
 
-CC      := clang
+CC      := gcc
 CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 
 DEBUG   := $(CFLAGS) -g3 -fsanitize=undefined -fsanitize=address
 VFLAGS  := $(CFLAGS) -g3
@@ -43,7 +43,7 @@ extension_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c l
 zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
 	zip -nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
 
-run: nuclei_pd
+run: parse_s interp_s ext_s
 	./parse_s test_code/basic_print.ncl
 	./parse_s test_code/demo1.ncl
 	./parse_s test_code/demo2.ncl
@@ -67,4 +67,15 @@ run: nuclei_pd
 	./interp_s test_code/simple_loop.ncl
 	./interp_s test_code/test.ncl
 	./interp_s test_code/triv.ncl
+	./ext_s test_code/basic_print.ncl
+	./ext_s test_code/demo1.ncl
+	./ext_s test_code/demo2.ncl
+	./ext_s test_code/demo3.ncl
+	./ext_s test_code/fibonacci.ncl
+	./ext_s test_code/parse_fail.ncl
+	./ext_s test_code/parse_pass_interp_fail.ncl
+	./ext_s test_code/print_set.ncl
+	./ext_s test_code/simple_loop.ncl
+	./ext_s test_code/test.ncl
+	./ext_s test_code/triv.ncl
 	
