@@ -149,8 +149,6 @@ Tree_node* handle_SET(Token_node** current, Prog_log* program_log) {
 }
 
 bool is_IF(Token_node* current) {
-    // print_token(current); // debugging
-    // printf(" <- this is the current token\n"); // debugging
     return (current->value->type == t_if);
 }
 
@@ -201,7 +199,7 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         bool execution_state = program_log->executing;
         bool execute = (lisp_get_val(loop->child1->list) == 1);
     #endif
-    if (!next_token_is(current, 1, t_r_parenthesis) || !next_token_is(current, 1, t_l_parenthesis)) {
+    if (!next_token_is(current, 1, ')') || !next_token_is(current, 1, '(')) {
         return parser_fails(program_log, "Expecting parentheses between bool and instructions within loop\n");
     }
     #ifdef INTERP

@@ -1,6 +1,6 @@
+To seperate my concerns, I've put all of the lexer code in a seperate .c and .h file, and have tested this seperately.  Then my parser and interpreter are in the nuclei.c/.h files.  I've explained the testing strategy for both, seperately, below.
 
-
-___Lexical parser testing___
+___Lexer testing___
 
 The following functions are assert tested in the lexical_parse_test() function as described:
 - get_file_name()
@@ -48,3 +48,46 @@ The following functions are structure-specific print functions so are not testab
 The following functions are used in the lexical_parse_test() function, but are not directly assert tested.  However, they free the memory allocated to the structures made for testing the other functions, and using Valgrind it is seen that running lexical_parse_test() does not result in any memory leaks.  Therefore, we can see that these functions work as intended:
 - free_token_list()
 - free_token_node()
+
+
+___parser testing___
+
+I've adopted a 'bottom-up' approach to testing this part of the code.  Because the entire lexer is a recursive call tree - there is no way to test the top funciton (i.e., the function that is called first) without calling all the other functions.  Therefore, my parser_test() function first assert tests the terminal functions (e.g., the functions that handle variables, strings and literals) and then, when we are confident that these work as intended we can take it as a given and test the functions that call them, and so on until we reach to top function.  The full order of this explained below.
+
+Structure of the recursive call tree:
+
+    descend_recursively()
+        |
+        v
+    handle_INSTRCTS() <-
+        |               |
+        v               |
+    handle_INSTRCT() ---
+        |
+        v
+    handle_FUNC()
+        |-------------------------------------------------------------------------------------------
+        |                                                       |                   |                   |
+        v                                                       v                   v                   v
+ -> handle_RETFUNC()                                        handle_IOFUNC()*    handle_IF()*        handle_LOOP()
+|       |---------------------------------------     -----------|-------------------|                   |
+|       |                   |                   |   |                                        ---------------
+|       v                   v                   v   v                                       |               |
+|   handle_LISTFUNC()   handle_INTFUNC()    handle_BOOLFUNC()                               v               v
+|       |                   |                   |                           |-----------handle_SET()    handle_PRINT()#
+|       --------------------------------------------------------------------|               |               |
+|                           |                                                               |               |
+|                           v                                                               v               v
+ -----------------------handle_LIST()-------------------------------------------------->handle_VAR()    handle_STRING()
+                        |           |
+                        v           v
+                    handle_NIL()    handle_LITERAL()
+
+*indicates an unshown call to handle_INSTRCTS()
+#indicates an unshown call to handle_LIST()
+
+As can be seen from the above, the base functions are handle_NIL(), handle_LITERAL, handle_VAR, and handle_STRING()
+
+
+___Interpreter testing___
+
