@@ -106,3 +106,4 @@ void print_log(Prog_log* log);
 void free_log(Prog_log* log);
 void add_error(Prog_log* program_log, char* error_message, bool parsing);
 void test(void);
+void parse_test(void);

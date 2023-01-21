@@ -83,12 +83,11 @@ void lisp_to_string(const Lisp* l, char* str) {
 }
 
 
-void lisp_free(Lisp** l) {
-    if (*l) {
-        lisp_free(&((*l)->car)); 
-        lisp_free(&((*l)->cdr));
-        free(*l);
-        *l = NULL;
+void lisp_free(Lisp* l) {
+    if (l) {
+        lisp_free((l->car)); 
+        lisp_free((l->cdr));
+        free(l);
     }
 }
 
@@ -698,13 +697,7 @@ void test_lisp(void) {
     assert(strcmp(test_string1, test_const_str6) == 0);
     
     //----------------------DISCRETE ASSERT TESTING----------------------------
-    
-    // assert testing lisp_free()
-    lisp_free(&test_lisp3);
-    assert(!test_lisp3);
-    
-    lisp_free(&test_lisp6);
-    assert(!test_lisp6);
+   
     
     // assert testing lisp_car() and Lisp_cdr()
     test_atom1 = lisp_atom(0);
@@ -744,7 +737,7 @@ void test_lisp(void) {
     assert(lisp_get_val(lisp_car(test_lisp5->cdr)) == 2);
     assert(lisp_get_val(lisp_car(test_lisp5->cdr->cdr)) == 3);
     assert(lisp_get_val(lisp_car(test_lisp5->cdr->cdr->cdr)) == 4);
-    lisp_free(&test_lisp5);
+    lisp_free(test_lisp5);
     
     test_lisp1 = lisp_atom(1);
     test_lisp2 = lisp_atom(2);
@@ -754,7 +747,7 @@ void test_lisp(void) {
     assert(lisp_length(test_lisp6) == 2);
     assert(lisp_get_val(lisp_car(test_lisp6)) == 1);
     assert(lisp_get_val(lisp_car(test_lisp6->cdr)) == 2);
-    lisp_free(&test_lisp6);
+    lisp_free(test_lisp6);
     free(test_lisp3);
     free(test_lisp4);
     
@@ -766,7 +759,7 @@ void test_lisp(void) {
     assert(lisp_length(test_lisp7) == 2);
     assert(lisp_get_val(lisp_car(test_lisp7)) == 3);
     assert(lisp_get_val(lisp_car(test_lisp7->cdr)) == 4);
-    lisp_free(&test_lisp7);
+    lisp_free(test_lisp7);
     free(test_lisp1);
     free(test_lisp2);
 
@@ -780,7 +773,7 @@ void test_lisp(void) {
     lisp_reduce(reduce_test_count_even_atoms, test_lisp1, &total);
     assert(total == 4);
     
-    lisp_free(&test_lisp1);
+    lisp_free(test_lisp1);
     
     test_lisp1 = lisp_from_string("()");
     total = EMPTY;
@@ -791,7 +784,7 @@ void test_lisp(void) {
     lisp_reduce(reduce_test_count_even_atoms, test_lisp1, &total);
     assert(total == 0);
     
-    lisp_free(&test_lisp1);
+    lisp_free(test_lisp1);
     
     test_lisp1 = lisp_from_string("1");
     total = EMPTY;
@@ -802,7 +795,7 @@ void test_lisp(void) {
     lisp_reduce(reduce_test_count_even_atoms, test_lisp1, &total);
     assert(total == 0);
     
-    lisp_free(&test_lisp1);
+    lisp_free(test_lisp1);
     
     // assert testing set_string_to_empty() - 
     set_string_to_empty(test_string1);
@@ -849,7 +842,7 @@ void test_lisp(void) {
     testStr1[index] = '\0';
     assert(strcmp(testStr1, "50") == 0);
     
-    lisp_free(&test_lisp3);
+    lisp_free(test_lisp3);
     
     // assert testing get_absolute()
     index = 0;
@@ -1061,7 +1054,7 @@ void test_lisp(void) {
     assert(current->cdr != NULL);
     assert(current->cdr == next);
       
-    lisp_free(&test_lisp1);
+    lisp_free(test_lisp1);
     
     // assert testing is_invalid()
     const char* testStr10 = "()";

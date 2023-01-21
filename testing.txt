@@ -52,7 +52,32 @@ The following functions are used in the lexical_parse_test() function, but are n
 
 ___parser testing___
 
-I've adopted a 'bottom-up' approach to testing this part of the code.  Because the entire lexer is a recursive call tree - there is no way to test the top funciton (i.e., the function that is called first) without calling all the other functions.  Therefore, my parser_test() function first assert tests the terminal functions (e.g., the functions that handle variables, strings and literals) and then, when we are confident that these work as intended we can take it as a given and test the functions that call them, and so on until we reach to top function.  The full order of this explained below.
+Most of the functions in this section of the code are used in the recursive descent parser, and so are called recursively from one another.  For these, I have used a specific testing patter.  However, there are also some stand-alone helper functions, which can be tested discretely.  The testing of these is discussed below.
+
+check_inputs()
+    This is a simple function, which does nothing if argc == 2, and throws an error otherwise.  because failure results in exit() being called (from withint throw_error()), there is no way to silently test this function.  However, its simplicity means that testing would be a bit superfluous - there is a single if statement in the functions.  One can glimpse at the function and be assured that it works as intended.
+    
+make_node()
+    Another fairly simple function - it allocates space for a Tree_node, assigns its type to the provided argument, and then returns a pointer to the node.
+    This has been assert tested with a number of different grammar_types, and it is confirmed that the return value is both a new Tree_node and is of the correct type.
+
+parser_fails()
+
+
+next_token_is()
+
+
+get_node_type()
+
+
+add_error()
+
+
+there are also some printing functions, which can't be silently tested for obvious reasons.  These functions are print_tree() and print_tree_node().  These were only used for debugging, and are kept in the codebase to assist with further development, if needed.  However, as they are not used in the normal functioning of the code, there is no need to test them.  print_log is another print function, which is used in the normal running of this code (when there is a parsing or interpretation error).  Because this is a printing function, there is no good way to test it.  However, 
+
+Further, there are the functions free_tree(), free_node() and free_log(), which are used to avoid memory leaks.  Because memory leaks can't be effectively assert tested, these have not been tested in the test() functions.  However, they are used in these functions (and the actual running of the program), and it can be seen from running the program in valgrind that there are no memory leaks.  Therefore, we can be confident that they work in freeing all memory in all of the assert tested cases (which are, for the reasons explained elsewhere in this document, comprehensively cover the complete usage of this code).
+
+I've adopted a 'bottom-up' approach to testing the recursive functions in this part of the code.  Because the entire lexer is a recursive call tree, there is no way to test the top functions (i.e., the functions that is called first) without calling all the other functions.  Therefore, my parser_test() function first assert tests the terminal functions (e.g., the functions that handle variables, strings and literals) and then, when we are confident that these work as intended we can take it as a given and test the functions that call them, and so on until we reach to top function.  The full order of this explained below.
 
 Structure of the recursive call tree:
 
@@ -87,6 +112,14 @@ Structure of the recursive call tree:
 #indicates an unshown call to handle_LIST()
 
 As can be seen from the above, the base functions are handle_NIL(), handle_LITERAL, handle_VAR, and handle_STRING()
+
+handle_NIL()
+    This function does one of two things: (1) if the token_node pointer directs to a t_nil type token, the function returns a NIL type tree node, and move the token_node pointer on by one; or (2) otherwise, the function returns a NULL pointer, does not move the pointer on, and adds an error to the error log.
+    Therefore, I have tested both of these eventualities, first with a t_nil token, and then with a non-'t_nil' token (I chose t_literal, so that I didn't have to reset before the next assert testing).  
+    For both of these, I have tested all of the variables that should have changed/remained the same, and confirmed that they have with assert testing.
+
+handle_LITERAL()
+
 
 
 ___Interpreter testing___

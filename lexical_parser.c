@@ -344,17 +344,23 @@ bool is_white_space(char c) {
 
 void add_variable(Token_list* tokens, Automata* automata, char name) {
     automata->state = s_start;
-    Token* new_token = (Token*)allocate_space(1, sizeof(Token));
-    new_token->type = t_variable;
-    new_token->var_name = name;
-    add_token(tokens, new_token);
+    if (!(automata->token)) {
+        automata->token = (Token*)allocate_space(1, sizeof(Token));
+    }
+    automata->token->type = t_variable;
+    automata->token->var_name = name;
+    add_token(tokens, automata->token);
+    automata->token = NULL;
 }
 
 void make_and_add_simple_token(Token_list* tokens, Automata* automata, token_type type) {
     automata->state = s_start;
-    Token* new_token = (Token*)allocate_space(1, sizeof(Token));
-    new_token->type = type;
-    add_token(tokens, new_token);
+    if (!(automata->token)) {
+        automata->token = (Token*)allocate_space(1, sizeof(Token));
+    }
+    automata->token->type = type;
+    add_token(tokens, automata->token);
+    automata->token = NULL;
 }
 
 void handle_s_start(Token_list* tokens, Automata* automata, char c) {
@@ -394,14 +400,18 @@ bool is_start_of_reserved_word(char c) {
 }
 
 void start_variable(Automata* automata, char c) {
-    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    if (!(automata->token)) {
+        automata->token = (Token*)allocate_space(1, sizeof(Token));
+    }
     automata->token->type = t_variable;
     automata->token->var_name = c;
     automata->state = s_in_variable;
 }
 
 void start_lexeme(Automata* automata, char c) {
-    automata->token = (Token*)allocate_space(1, sizeof(Token));
+    if (!(automata->token)) {
+        automata->token = (Token*)allocate_space(1, sizeof(Token));
+    }
     automata->token->type = (c == '"') ? t_string : t_literal;
     automata->token->lexeme = (char*)allocate_space(LEXEMEMAXLEN, sizeof(char));
     automata->state = (c == '"') ? s_in_string : s_in_literal;
@@ -433,9 +443,11 @@ void check_end_of_token(Token_list* tokens, Automata* automata, token_type type,
 void handle_lexeme(Token_list* tokens, Automata* automata, char c) {
     if ((automata->state == s_in_literal) && (c == SINGLEQUOTE)) {
         add_token(tokens, automata->token);
+        automata->token = NULL;
         automata->state = s_start;
     } else if ((automata->state == s_in_string) && (c == '"')) {
         add_token(tokens, automata->token);
+        automata->token = NULL;
         automata->state = s_start;
     } else {
         int index = 0;
@@ -464,6 +476,7 @@ void handle_s_invalid(Token_list* tokens, Automata* automata, char c) {
 void handle_s_variable(Token_list* tokens, Automata* automata, char c) {
     if (is_white_space(c)) {
         add_token(tokens, automata->token);
+        automata->token = NULL;
         automata->state = s_start;
     } else if (c == ')') {
         add_variable(tokens, automata, automata->token->var_name);
@@ -559,7 +572,7 @@ void add_token(Token_list* tokens, Token* token) {
             tokens->start = tokens->end = new_token_node;
         } else {
             Token_node* temp = tokens->end;
-            tokens->end = tokens->end->next = new_token_node;
+            tokens->end = temp->next = new_token_node;
             tokens->end->previous = temp;
         }
     }
@@ -569,6 +582,7 @@ void free_token_list(Token_list* list) {
     if (list) {
         free_token_node(list->start);
     }
+    free(list);
 }
 
 void free_token_node(Token_node* node) {
@@ -576,6 +590,10 @@ void free_token_node(Token_node* node) {
         if (node->next) {
             free_token_node(node->next);
         }
+        if (node->value->lexeme) {
+            free(node->value->lexeme);
+        }
+        free(node->value);
         free(node);
     }
 }

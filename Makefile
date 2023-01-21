@@ -11,59 +11,60 @@ DEBUG   := $(CFLAGS) -g3 -fsanitize=undefined -fsanitize=address
 VFLAGS  := $(CFLAGS) -g3
 PROD    := $(CFLAGS) -O3
 
-all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind
+all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind extension extension_debug extension_valgrind
 	
 parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_p $(PROD)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o parse $(PROD)
 
 parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_pd $(DEBUG)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o parse_s $(DEBUG)
 
 parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_pv $(VFLAGS)	
+	$(CC) nuclei.c lexical_parser.c lisp.c -o parse_v $(VFLAGS)	
 	
 interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_i -DINTERP $(PROD)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o interp -DINTERP $(PROD)
 
 interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_id -DINTERP $(DEBUG)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o interp_s -DINTERP $(DEBUG)
 
 interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_iv -DINTERP $(VFLAGS)	
+	$(CC) nuclei.c lexical_parser.c lisp.c -o interp_v -DINTERP $(VFLAGS)	
 	
 extension: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_i -DINTERP -DEXT $(PROD)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o ext -DINTERP -DEXT $(PROD)
 
 extension_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_id -DINTERP -DEXT $(DEBUG)
+	$(CC) nuclei.c lexical_parser.c lisp.c -o ext_s -DINTERP -DEXT $(DEBUG)
 
 extension_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
-	$(CC) nuclei.c lexical_parser.c lisp.c -o nuclei_iv -DINTERP -DEXT $(VFLAGS)	
+	$(CC) nuclei.c lexical_parser.c lisp.c -o ext_v -DINTERP -DEXT $(VFLAGS)	
 
-zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
-	zip nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
+zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	zip -nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
 
-run: nuclei_pd nuclei_id
-	./nuclei_pd test_code/basic_print.ncl
-	./nuclei_pd test_code/demo1.ncl
-	./nuclei_pd test_code/demo2.ncl
-	./nuclei_pd test_code/demo3.ncl
-	./nuclei_pd test_code/fibonacci.ncl
-	./nuclei_pd test_code/inf_loop.ncl
-	./nuclei_pd test_code/parse_fail.ncl
-	./nuclei_pd test_code/parse_pass_interp_fail.ncl
-	./nuclei_pd test_code/print_set.ncl
-	./nuclei_pd test_code/simple_loop.ncl
-	./nuclei_pd test_code/test.ncl
-	./nuclei_pd test_code/triv.ncl
-	./nuclei_id test_code/basic_print.ncl
-	./nuclei_id test_code/demo1.ncl
-	./nuclei_id test_code/demo2.ncl
-	./nuclei_id test_code/demo3.ncl
-	./nuclei_id test_code/fibonacci.ncl
-	./nuclei_id test_code/parse_fail.ncl
-	./nuclei_id test_code/parse_pass_interp_fail.ncl
-	./nuclei_id test_code/print_set.ncl
-	./nuclei_id test_code/simple_loop.ncl
-	./nuclei_id test_code/test.ncl
-	./nuclei_id test_code/triv.ncl
+run: nuclei_pd
+	./parse_s test_code/basic_print.ncl
+	./parse_s test_code/demo1.ncl
+	./parse_s test_code/demo2.ncl
+	./parse_s test_code/demo3.ncl
+	./parse_s test_code/fibonacci.ncl
+	./parse_s test_code/inf_loop.ncl
+	./parse_s test_code/parse_fail.ncl
+	./parse_s test_code/parse_pass_interp_fail.ncl
+	./parse_s test_code/print_set.ncl
+	./parse_s test_code/simple_loop.ncl
+	./parse_s test_code/test.ncl
+	./parse_s test_code/triv.ncl
+	./interp_s test_code/basic_print.ncl
+	./interp_s test_code/demo1.ncl
+	./interp_s test_code/demo2.ncl
+	./interp_s test_code/demo3.ncl
+	./interp_s test_code/fibonacci.ncl
+	./interp_s test_code/parse_fail.ncl
+	./interp_s test_code/parse_pass_interp_fail.ncl
+	./interp_s test_code/print_set.ncl
+	./interp_s test_code/simple_loop.ncl
+	./interp_s test_code/test.ncl
+	./interp_s test_code/triv.ncl
+	

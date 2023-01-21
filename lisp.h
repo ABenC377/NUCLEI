@@ -47,7 +47,7 @@ bool lisp_is_atomic(const Lisp* l);
 Lisp* lisp_copy(const Lisp* l);
 int lisp_length(const Lisp* l);
 void lisp_to_string(const Lisp* l, char* str);
-void lisp_free(Lisp** l);
+void lisp_free(Lisp* l);
 Lisp* lisp_from_string(const char* str);
 Lisp* lisp_list(const int n, ...);
 void lisp_reduce(void (*func)(Lisp* l, int* n), Lisp* l, int* acc);
