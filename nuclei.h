@@ -95,6 +95,8 @@ bool is_BOOLFUNC(Token_node* current);
 Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* program_log);
 bool evaluate_bool(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log);
 Tree_node* handle_LIST(Token_node** current, Prog_log* program_log);
+void check_initialised(Token_node* token_node, Tree_node* tree_node, Prog_log* log);
+Lisp* move_list(Lisp** original);
 Tree_node* handle_VAR(Token_node** current, Prog_log* program_log);
 Tree_node* handle_LITERAL(Token_node** current, Prog_log* program_log);
 Tree_node* handle_NIL(Token_node** current, Prog_log* program_log);
