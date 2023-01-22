@@ -263,27 +263,26 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log) {
     list_function->child2 = (type == t_CONS) ? handle_LIST(current, program_log) : NULL;
     #ifdef INTERP
     if (program_log->executing) {
-        list_function->list = evaluate_list_function(type, list_function->child1->list, 
-        (type == t_CONS) ? list_function->child2->list : NULL);
-        list_function->child1->list = NULL;
-        if (type == t_CONS) {
-            list_function->child2->list = NULL;
-        }
+        list_function->list = evaluate_list_function(type, &(list_function->child1->list), 
+        (type == t_CONS) ? &(list_function->child2->list) : NULL);
     }
     #endif
     return list_function;
 }
 
-Lisp* evaluate_list_function(token_type type, Lisp* arg1, Lisp* arg2) {
+Lisp* evaluate_list_function(token_type type, Lisp** arg1, Lisp** arg2) {
     Lisp* output;
     if (type == t_CAR) {
-        output = lisp_copy(lisp_car(arg1));
-        lisp_free(arg1);
+        output = lisp_copy(lisp_car(*arg1));
+        lisp_free(*arg1);
+        *arg1 = NULL;
     } else if (type == t_CDR) {
-        output = lisp_copy(lisp_cdr(arg1));
-        lisp_free(arg1);
+        output = lisp_copy(lisp_cdr(*arg1));
+        lisp_free(*arg1);
+        *arg1 = NULL;
     } else {
-        Lisp* cons = lisp_cons(arg1, arg2);
+        Lisp* cons = lisp_cons(*arg1, *arg2);
+        *arg1 = NULL; *arg2 = NULL;
         output = lisp_copy(cons);
         lisp_free(cons);
     }

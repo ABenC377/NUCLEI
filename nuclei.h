@@ -85,7 +85,7 @@ bool is_LOOP(Token_node* current);
 Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log);
 bool is_LISTFUNC(Token_node* current);
 Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log);
-Lisp* evaluate_list_function(token_type type, Lisp* arg1, Lisp* arg2);
+Lisp* evaluate_list_function(token_type type, Lisp** arg1, Lisp** arg2);
 bool is_INTFUNC(Token_node* current);
 Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log);
 Lisp* evaluate_plus(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log);
