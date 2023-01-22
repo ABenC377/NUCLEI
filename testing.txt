@@ -118,7 +118,11 @@ handle_NIL()
     Therefore, I have tested both of these eventualities, first with a t_nil token, and then with a non-'t_nil' token (I chose t_literal, so that I didn't have to reset before the next assert testing).  
     For both of these, I have tested all of the variables that should have changed/remained the same, and confirmed that they have with assert testing.
 
-handle_LITERAL()
+handle_LITERAL(), handle_VAR(), and handle_STRING()
+    These functions do the same binary thing as handle_NIL(), when in parsing mode (i.e., neither INTERP or EXT defined).  Therefore, these are tested in the same way in the parsing testing - i.e., run with a token of the correct type to make sure that they create the correct tree node, and move the pointer on; and an incorrect type to make sure that they add an error to the log.
+    
+The next level up the recursive tree is handle_PRINT(), which only calls handle_STRING() and handle_LITERAL(). 
+
 
 
 

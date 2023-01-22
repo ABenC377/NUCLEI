@@ -813,7 +813,7 @@ void parse_test(void) {
     // current is at a variable token, so should make a valid tree node
     // and move the current pointer on one.
     Tree_node* test_variable_node = handle_VAR(&current, test_log);
-    assert(test_variable_node->type == LITERAL);
+    assert(test_variable_node->type == VAR);
     assert(current->value->type == t_string);
     assert(test_log->num_errors == 2);
     free_node(test_variable_node);
@@ -826,9 +826,25 @@ void parse_test(void) {
     assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
     free_node(test_variable_node);
     
-    
+    /*
     // handle_STRING()
-    
+    // current is at a variable token, so should make a valid tree node
+    // and move the current pointer on one.
+    Tree_node* test_variable_node = handle_VAR(&current, test_log);
+    assert(test_variable_node->type == VAR);
+    assert(current->value->type == t_string);
+    assert(test_log->num_errors == 2);
+    free_node(test_variable_node);
+    // current is now at a string token, so should return a NULL pointer, add
+    // an error to the log, and not move the current pointer on.
+    test_variable_node = handle_VAR(&current, test_log);
+    assert(test_variable_node->type == ERROR_NODE);
+    assert(current->value->type == t_string);
+    assert(test_log->num_errors == 3);
+    assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
+    free_node(test_variable_node);
+    */
+   
     free_token_list(test_tokens);
     free_log(test_log);
 }
