@@ -236,10 +236,6 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* log) {
     loop->child2 = handle_INSTRCTS(current, log);
     #ifdef INTERP
         if (execution_state && execute) {
-            *current = loop_start;
-            free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
-            loop = handle_LOOP(current, log);
-            log->executing = execution_state;
         }
         log->executing = (execution_state && !execute) ? true : log->executing;
     #endif
@@ -299,7 +295,8 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* log) {
     Tree_node* int_function = make_node(INTFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 2, t_plus, t_length)) {
-        return parser_fails(log, (*current)->value, "Expecting 'PLUS' or 'LENGTH' in unteger function\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting 'PLUS' or 'LENGTH' in unteger function\n");
     } else {
         int_function->func_type = type;
         int_function->child1 = handle_LIST(current, log);
@@ -370,8 +367,7 @@ Tree_node* handle_BOOLFUNC(Token_node** current, Prog_log* log) {
         bool evaluates = evaluate_bool(operator, bool_function->child1->list, 
         bool_function->child2->list, log);
         bool_function->list = (evaluates) ? lisp_atom(1) : lisp_atom(0);
-        lisp_free(bool_function->child1->list);
-        lisp_free(bool_function->child2->list);
+        lisp_free(bool_function->child1->list); lisp_free(bool_function->child2->list);
         bool_function->child1->list = bool_function->child2->list = NULL;
     }
     #endif
@@ -413,11 +409,13 @@ Tree_node* handle_LIST(Token_node** current, Prog_log* log) {
     } else if (next_token_is(current, 1, t_l_parenthesis)) {
         list->child1 = handle_RETFUNC(current, log);
         if (!next_token_is(current, 1, t_r_parenthesis)) {
-            return parser_fails(log, (*current)->value, "Expecting closing parenthesis after return function\n");
+            return parser_fails(log, (*current)->value, 
+            "Expecting closing parenthesis after return function\n");
         }
     } else {
         free_node(list);
-        return parser_fails(log, (*current)->value, "Expecting variable, literal, 'nil' or return function in list\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting variable, literal, 'nil' or return function in list\n");
     }
     #ifdef INTERP
     list->list = (log->executing && (type != t_nil)) ? move_list(&(list->child1->list)) : NULL;
@@ -446,7 +444,8 @@ Lisp* move_list(Lisp** original) {
 
 Tree_node* handle_VAR(Token_node** current, Prog_log* log) {
     if ((*current)->value->type != t_variable) {
-        return parser_fails(log, (*current)->value, "Expecting a variable\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting a variable\n");
     }
     Tree_node* var = make_node(VAR);
     var->var_name = (*current)->value->var_name;
@@ -465,20 +464,18 @@ Tree_node* handle_LITERAL(Token_node** current, Prog_log* log) {
     if ((*current)->value->type == t_literal) {
         Tree_node* literal = make_node(LITERAL);
         #ifdef INTERP
-        if (log->executing) {
-            if (is_invalid((*current)->value->lexeme)) {
-                literal->type = ERROR_NODE;
-            } else {
-                literal->list = lisp_from_string((*current)->value->lexeme);
-            }
+        if (log->executing && is_invalid((*current)->value->lexeme)) {
+            literal->type = ERROR_NODE;
+        } else if (log->executing) {
+            literal->list = lisp_from_string((*current)->value->lexeme);
         }
         #endif
         *current = (*current)->next;
         return literal;
     } else {
-        return parser_fails(log, (*current)->value, "Expecting literal\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting literal\n");
     }
-    
 }
 
 Tree_node* handle_NIL(Token_node** current, Prog_log* log)  {
@@ -505,16 +502,20 @@ Tree_node* handle_PRINT(Token_node** current, Prog_log* log) {
     } else if (is_LIST(*current)) {
         print->child1 = handle_LIST(current, log);
         #ifdef INTERP
-            if (log->executing) {
-                char string_to_print[MAXSTR];
-                lisp_to_string(print->child1->list, string_to_print);
-                printf("%s\n", string_to_print);
-                lisp_free(print->child1->list);
-                print->child1->list = NULL;
-            }
+        print_lisp(&(print->child1->list), log);
         #endif
     }
     return print;
+}
+
+void print_lisp(Lisp** lisp, Prog_log* log) {
+    if (log->executing) {
+        char string_to_print[MAXSTR];
+        lisp_to_string(*lisp, string_to_print);
+        printf("%s\n", string_to_print);
+        lisp_free(*lisp);
+        *lisp = NULL;
+    }
 }
 
 bool is_LIST(Token_node* current) {

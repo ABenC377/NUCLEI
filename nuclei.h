@@ -101,6 +101,7 @@ Tree_node* handle_VAR(Token_node** current, Prog_log* program_log);
 Tree_node* handle_LITERAL(Token_node** current, Prog_log* program_log);
 Tree_node* handle_NIL(Token_node** current, Prog_log* program_log);
 Tree_node* handle_PRINT(Token_node** current, Prog_log* program_log);
+void print_lisp(Lisp** lisp, Prog_log* log);
 bool is_LIST(Token_node* current);
 Tree_node* handle_STRING(Token_node** current, Prog_log* program_log);
 Tree_node* make_node(grammar_type type);
