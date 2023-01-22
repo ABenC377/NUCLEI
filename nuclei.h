@@ -88,6 +88,7 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log);
 Lisp* evaluate_list_function(token_type type, Lisp** arg1, Lisp** arg2);
 bool is_INTFUNC(Token_node* current);
 Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log);
+Lisp* evaluate_int_function(Token_node* node, token_type type, Prog_log* log, Lisp** arg1, Lisp** arg2);
 Lisp* evaluate_plus(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log);
 Lisp* evaluate_length(Lisp* arg);
 bool is_BOOLFUNC(Token_node* current);

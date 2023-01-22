@@ -308,18 +308,27 @@ Tree_node* handle_INTFUNC(Token_node** current, Prog_log* program_log) {
         int_function->child2 = handle_LIST(current, program_log);
     }
     #ifdef INTERP
-        if (type == t_plus && program_log->executing) {
-            int_function->list = evaluate_plus((*current), int_function->child1->list, int_function->child2->list, program_log);
-            lisp_free(int_function->child1->list);
-            lisp_free(int_function->child2->list);
-            int_function->child1->list = int_function->child2->list = NULL;
-        } else if (program_log->executing) {
-            int_function->list = evaluate_length(int_function->child1->list);
-            lisp_free(int_function->child1->list);
-            int_function->child1->list = NULL;
-        }
+        int_function->list = evaluate_int_function((*current), type, program_log, &(int_function->child1->list),
+        (type == t_plus) ? &(int_function->child2->list) : NULL);
     #endif
     return int_function;
+}
+
+Lisp* evaluate_int_function(Token_node* node, token_type type, Prog_log* log, Lisp** arg1, Lisp** arg2) {
+    Lisp* output;
+    if (type == t_plus && log->executing) {
+        output = evaluate_plus(node, *arg1, *arg2, log);
+        lisp_free(*arg1);
+        lisp_free(*arg2);
+        *arg1 = *arg2 = NULL;
+    } else if (log->executing) {
+        output = evaluate_length(*arg1);
+        lisp_free(*arg1);
+        *arg1 = NULL;
+    } else {
+        output = NULL;
+    }
+    return output;
 }
 
 Lisp* evaluate_plus(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log) {
