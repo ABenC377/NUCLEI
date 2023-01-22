@@ -52,7 +52,8 @@ Tree_node* descend_recursively(Token_node** current, Prog_log* log) {
 }
 
 Tree_node* handle_INSTRCTS(Token_node** current, Prog_log* log) {
-    if (!(*current)) {
+    if ((*current)->value->type != '(' && 
+        (*current)->value->type != ')') {
         return parser_fails(log, (*current)->value, 
         "Expecting further instructions\n");
     } else if (next_token_is(current, 1, t_r_parenthesis)) {
@@ -76,6 +77,7 @@ Tree_node* handle_INSTRCT(Token_node** current, Prog_log* log) {
     Tree_node* instruction = make_node(INSTRCT);
     instruction->child1 = handle_FUNC(current, log);
     if (!next_token_is(current, 1, t_r_parenthesis)) {
+        free_node(instruction);
         return parser_fails(log, (*current)->value, 
         "Expecting closing parenthesis after function in instruction\n");
     }
@@ -1228,6 +1230,27 @@ void parse_test(void) {
     test_token->type = t_l_parenthesis;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // INSTRCT testing
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_print;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -1239,7 +1262,73 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token)); // INSTRCT testing
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // INSTRCTS testing
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // PROG testing
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     
@@ -1693,6 +1782,120 @@ void parse_test(void) {
     current = current->next;
     free_log(test_log);
     test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
+    
+    // handle_FUNC()
+    // token is t_CAR->t_literal-- should return a FUNC node, with a RETFUNC node at child1
+    Tree_node* test_func_node = handle_FUNC(&current, test_log);
+    assert(test_func_node->type == FUNC);
+    assert(test_func_node->child1->type == RETFUNC);
+    assert(current->value->type == t_print);
+    assert(test_log->num_errors == 0);
+    free_node(test_func_node);
+    // token is t_print->t_literal-- should return a FUNC node, with an IOFUNC node at child1
+    test_func_node = handle_FUNC(&current, test_log);
+    assert(test_func_node->type == FUNC);
+    assert(test_func_node->child1->type == IOFUNC);
+    assert(current->value->type == t_if);
+    assert(test_log->num_errors == 0);
+    free_node(test_func_node);
+    // token is t_if->t_l_parenthesis->t_equal->t_literal->t_literal->t_r_parenthesis->t_l_parenthesis->t_l_parenthesis->t_print->t_print->t_r_parenthesis->t_r_parenthesis->t_l_parenthesis->t_l_parenthesis->t_print->t_print->t_r_parenthesis->t_r_parenthesis -- should return a FUNC node, with an IF node at child1
+    test_func_node = handle_FUNC(&current, test_log);
+    assert(test_func_node->type == FUNC);
+    assert(test_func_node->child1->type == IF);
+    assert(current->value->type == t_while);
+    assert(test_log->num_errors == 0);
+    free_node(test_func_node);
+    // token is t_while->t_l_parenthesis->t_equal->t_literal->t_literal->t_r_parenthesis->t_l_parenthesis->t_l_parenthesis->t_print->t_print->t_r_parenthesis->t_r_parenthesis -- should return a FUNC node, with a LOOP node at child1
+    test_func_node = handle_FUNC(&current, test_log);
+    assert(test_func_node->type == FUNC);
+    assert(test_func_node->child1->type == LOOP);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 0);
+    free_node(test_func_node);
+    // token is t_nil -- should return an ERROR node (not a valid type of function), and add an error to the log
+    test_func_node = handle_FUNC(&current, test_log);
+    assert(test_func_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 1);
+    assert(strcmp(test_log->errors[0]->message, 
+    "Expecting function in instruction\n") == 0);
+    free_node(test_func_node);
+    current = current->next;
+    
+    // handle_INSTRCT()
+    // token is t_l_parenthesis->t_print->t_literal->t_r_parenthesis -- should return an INSTRCT node, with a FUNC node at child1
+    Tree_node* test_instrct_node = handle_INSTRCT(&current, test_log);
+    assert(test_instrct_node->type == INSTRCT);
+    assert(test_instrct_node->child1->type == FUNC);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 1);
+    free_node(test_instrct_node);
+    // token is t_nil -- should return an ERROR node (no opening parenthesis)
+    test_instrct_node = handle_INSTRCT(&current, test_log);
+    assert(test_instrct_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 2);
+    assert(strcmp(test_log->errors[1]->message, 
+    "Expecting opening parenthesis to begin function\n") == 0);
+    free_node(test_instrct_node);
+    current = current->next;
+    // token is t_l_parenthesis->t_print->t_literal->t_nil -- should return an ERROR node (no closing parenthesis)
+    test_instrct_node = handle_INSTRCT(&current, test_log);
+    assert(test_instrct_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 3);
+    assert(strcmp(test_log->errors[2]->message, 
+    "Expecting closing parenthesis after function in instruction\n") == 0);
+    free_node(test_instrct_node);
+    current = current->next;
+    
+    // handle_INSTRCTS()
+    // token is t_r_parenthesis -- should return a NULL pointer
+    Tree_node* test_instrcts_node = handle_INSTRCTS(&current, test_log);
+    assert(test_instrcts_node == NULL);
+    assert(test_log->num_errors == 3);
+    // token is t_l_parenthesis->t_print->t_literal->t_r_parenthesis->t_r_parenthesis -- should return an INSTRCTS node with an INSTRCT node at child1, and NULL at child2
+    test_instrcts_node = handle_INSTRCTS(&current, test_log);
+    assert(test_instrcts_node->type == INSTRCTS);
+    assert(test_instrcts_node->child1->type == INSTRCT);
+    assert(test_instrcts_node->child2 == NULL);
+    assert(test_log->num_errors == 3);
+    free_node(test_instrcts_node);
+    // token is t_nil -- should return an ERROR node (no INSTRCT)
+    test_instrcts_node = handle_INSTRCTS(&current, test_log);
+    assert(test_instrcts_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 4);
+    assert(strcmp(test_log->errors[3]->message, 
+    "Expecting further instructions\n") == 0);
+    free_node(test_instrcts_node);
+    current = current->next;
+    // token is t_l_parenthesis->t_print->t_literal->t_r_parenthesis->t_nil -- should return an INSTRCTS node, but also raise an error message
+    test_instrcts_node = handle_INSTRCTS(&current, test_log);
+    assert(test_instrcts_node->type == INSTRCTS);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 5);
+    assert(strcmp(test_log->errors[4]->message, 
+    "Expecting further instructions\n") == 0);
+    free_node(test_instrcts_node);
+    current = current->next;
+    
+    // descend_recursively()
+    // token is t_l_parenthesis->t_l_parenthesis->t_print->t_literal->t_r_parenthesis->t_r_parenthesis -- should return a PROG node, with an INSTRCTS node at child1
+    Tree_node* test_prog_node = descend_recursively(&current, test_log);
+    assert(test_prog_node->type == PROG);
+    assert(test_prog_node->child1->type == INSTRCTS);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 5);
+    free_node(test_prog_node);
+    // token is t_nil -- should return an ERROR node (no PROG)
+    test_prog_node = descend_recursively(&current, test_log);
+    assert(test_prog_node->type == ERROR_NODE);
+    assert(test_log->num_errors == 6);
+    assert(strcmp(test_log->errors[5]->message, 
+    "Expecting opening parenthesis before instructions in program\n") == 0);
+    free_node(test_prog_node);
+    current = current->next;
     
     
     

@@ -84,10 +84,10 @@ Structure of the recursive call tree:
     descend_recursively()
         |
         v
-    handle_INSTRCTS() <-
-        |               |
-        v               |
-    handle_INSTRCT() ---
+    handle_INSTRCTS()
+        |
+        v
+    handle_INSTRCT() 
         |
         v
     handle_FUNC()
@@ -164,9 +164,14 @@ After this, there is a fairly linear route to the top of the recursive tree.  We
 handle_FUNC()
     This is a simple redirecting function.  It checks whether the next tokens are a RETFUNC, IOFUNC, IF, or LOOP, and then calls the respective handle_... function.  If the tokens are none of the above, then it returns and ERROR node.  Assert testing shows that this function works as it should in its five use cases.
 
+handle_INSTRCT()
+    This function should check for an opening parenthesis (returning ERROR node if not), then add a FUNC to child1, then check for a closing parenthesis (returning an ERROR node if not).  Assert testing shows that this function fails if either of the parentheses are missing, and works otherwise.  I.e., this functions functions correctly.
 
+handle_INSTRCTS()
+    This function should return NULL if there is a closing parenthesis (this indicates that the previous INSTRCTS had no follow-on, so NULL is sufficient here).  Otherwise, it should check whether the following tokens constitute an INSTRCT followed by an INSTRCTS.  If they do, then it should return an INSTRCTS node with an INSTRCT node at child1 and (if it isn't a closing parenthesis INSTRCTS), another INSTRCTS node at child2.  If not, then it returns an ERROR node.  Assert testing shows that each of these three behaviours is correctly achieved by the function.
 
-
+descend_recursively()
+    This is possible the simplest of the recursive descent functions.  It checks for an opening parenthesis.  If it is there, then it returns a PROG node with an INSTRCTS node at child1.  If not, then it returns an ERROR node.  Assert testing confirms both of these modes work correctly.
 
 ___Interpreter testing___
 
