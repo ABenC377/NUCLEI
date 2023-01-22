@@ -428,15 +428,18 @@ Tree_node* handle_LIST(Token_node** current, Prog_log* log) {
 }
 
 void check_initialised(Token_node* token_node, Tree_node* tree_node, Prog_log* log) {
-    int index = tree_node->var_name - 'A';
-    if (log->variables[index] == NULL) {
-        tree_node->type = ERROR_NODE;
-        Error* error = (Error*)allocate_space(1, sizeof(Error));
-        error->line = token_node->value->line;
-        error->col = token_node->value->col;
-        error->message = "INTERPRETER ERROR: uninitialised variable used\n";
-        add_error(log, error, false);
+    if (tree_node->var_name) {
+        int index = tree_node->var_name - 'A';
+        if (log->variables[index] == NULL) {
+            tree_node->type = ERROR_NODE;
+            Error* error = (Error*)allocate_space(1, sizeof(Error));
+            error->line = token_node->value->line;
+            error->col = token_node->value->col;
+            error->message = "INTERPRETER ERROR: uninitialised variable used\n";
+            add_error(log, error, false);
+        }
     }
+    
 }
 
 Lisp* move_list(Lisp** original) {
@@ -497,10 +500,10 @@ Tree_node* handle_NIL(Token_node** current, Prog_log* log)  {
 }
 
 Tree_node* handle_PRINT(Token_node** current, Prog_log* log) {
-    Tree_node* print = make_node(PRINT);
     if (!next_token_is(current, 1, t_print)) {
         return parser_fails(log, (*current)->value, "Expecting 'PRINT' in print statement\n");
     } 
+    Tree_node* print = make_node(PRINT);
     if ((*current)->value->type == t_string) {
         print->child1 = handle_STRING(current, log);
         #ifdef INTERP
@@ -766,6 +769,45 @@ void parse_test(void) {
     test_token->type = t_string;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_variable;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_CONS;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_while;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -835,24 +877,75 @@ void parse_test(void) {
     assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
     free_node(test_variable_node);
      
-    /*  
     // handle_STRING()
-    // current is at a variable token, so should make a valid tree node
+    // current is at a string token, so should make a valid tree node
     // and move the current pointer on one.
-    Tree_node* test_variable_node = handle_VAR(&current, test_log);
-    assert(test_variable_node->type == VAR);
-    assert(current->value->type == t_string);
-    assert(test_log->num_errors == 2);
-    free_node(test_variable_node);
-    // current is now at a string token, so should return a NULL pointer, add
-    // an error to the log, and not move the current pointer on.
-    test_variable_node = handle_VAR(&current, test_log);
-    assert(test_variable_node->type == ERROR_NODE);
-    assert(current->value->type == t_string);
+    Tree_node* test_string_node = handle_STRING(&current, test_log);
+    assert(test_string_node->type == STRING);
+    assert(current->value->type == t_variable);
     assert(test_log->num_errors == 3);
-    assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
-    free_node(test_variable_node);
-    */
+    free_node(test_string_node);
+    // current is now at a variable token, so should return a NULL pointer, add
+    // an error to the log, and not move the current pointer on.
+    test_string_node = handle_STRING(&current, test_log);
+    assert(test_string_node->type == ERROR_NODE);
+    assert(current->value->type == t_variable);
+    assert(test_log->num_errors == 4);
+    assert(strcmp(test_log->errors[3]->message, "Expecting string\n") == 0);
+    free_node(test_string_node);
+    
+    
+    // handle_LIST()
+    // token is variable -> should return a LIST node with a VAR node at child1
+    Tree_node* test_list_node = handle_LIST(&current, test_log);
+    assert(test_list_node->type == LIST);
+    assert(test_list_node->child1->type == VAR);
+    assert(current->value->type == t_literal);
+    assert(test_log->num_errors == 4);
+    free_node(test_list_node);
+    // token is literal -> should return a LIST node with a LITERAL node at child1
+    test_list_node = handle_LIST(&current, test_log);
+    assert(test_list_node->type == LIST);
+    assert(test_list_node->child1->type == LITERAL);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 4);
+    free_node(test_list_node);
+    // token is nil -> should return a LIST node with a NIL node at child1
+    test_list_node = handle_LIST(&current, test_log);
+    assert(test_list_node->type == LIST);
+    assert(test_list_node->child1->type == NIL);
+    assert(current->value->type == t_l_parenthesis);
+    assert(test_log->num_errors == 4);
+    free_node(test_list_node);
+    // token is (, followed by CONS LITERAL, LITERAL, ) -> should return a LIST node with a RETFUNC node at child1, LISTFUNC node at child1 of that, LIST nodes at child1 and child2 of that, and LITERAL nodes at child1 of those.
+    test_list_node = handle_LIST(&current, test_log);
+    assert(test_list_node->type == LIST);
+    assert(test_list_node->child1->type == RETFUNC);
+    assert(test_list_node->child1->child1->type == LISTFUNC);
+    assert(test_list_node->child1->child1->child1->type == LIST);
+    assert(test_list_node->child1->child1->child2->type == LIST);
+    assert(test_list_node->child1->child1->child1->child1->type == LITERAL);
+    assert(test_list_node->child1->child1->child2->child1->type == LITERAL);
+    assert(current->value->type == t_while);
+    assert(test_log->num_errors == 4);
+    free_node(test_list_node);
+    // Now the next token is a WHILE token.  Therefore, handle_LIST() should fail.  As we've seen, this should return an ERROR node, and add an error message to the log
+    test_list_node = handle_LIST(&current, test_log);
+    assert(test_list_node->type == ERROR_NODE);
+    assert(current->value->type == t_while);
+    assert(test_log->num_errors == 5);
+    assert(strcmp(test_log->errors[4]->message, 
+    "Expecting variable, literal, 'nil' or return function in list\n") == 0);
+    
+    free_node(test_list_node);
+    
+    
+    
+    
+    
+    
+    
+    
    
     free_token_list(test_tokens);
     free_log(test_log);

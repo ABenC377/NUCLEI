@@ -62,6 +62,6 @@ runall : ./parse_s ./interp_s ./extension_s $(PRES) $(IRES) $(ERES)
 clean:
 	rm -f parse parse_s parse_v interp interp_s interp_v extension extension_s extension_v $(PRES) $(IRES) $(ERES)
 	
-zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
-	zip nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
+zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile testing.txt extension.txt
+	zip nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile testing.txt extension.txt
 

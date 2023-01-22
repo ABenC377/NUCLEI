@@ -121,7 +121,10 @@ handle_NIL()
 handle_LITERAL(), handle_VAR(), and handle_STRING()
     These functions do the same binary thing as handle_NIL(), when in parsing mode (i.e., neither INTERP or EXT defined).  Therefore, these are tested in the same way in the parsing testing - i.e., run with a token of the correct type to make sure that they create the correct tree node, and move the pointer on; and an incorrect type to make sure that they add an error to the log.
     
-The next level up the recursive tree is handle_PRINT(), which only calls handle_STRING() and handle_LITERAL(). 
+The next level up the recursive tree, it becomes a bit more complicated, because handle_LIST() can call handle_RETFUNC() (much higher up the tree), and is called by both handle_SET() and handle_PRINT().  Therefore, for now, we are going to take it on faith that handle_RETFUNC() works as intended.  Of course, we will test it later on in order to confirm this.
+
+Therefore, we are next testing handle_LIST().  
+    handle_LIST() is a function that does a lot of heavy lifting, because the grammar for <LIST> allows four diecrete options, all of which need to be handled differently.  In brief, this function works out which of the four branches to take, and then calls a function to handle that branch (or returns an error if it is none of those four branches).  therefore, I have tested this function against tokens for each of VAR, LITERAL and NIL, as well as a RETFUNC, and an incorrect token.  I have tested that this returns the correct tree node for each of these eventualities.
 
 
 
