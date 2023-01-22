@@ -146,23 +146,22 @@ Tree_node* handle_SET(Token_node** current, Prog_log* log) {
     if (!next_token_is(current, 1, t_set)) {
         return parser_fails(log, (*current)->value, 
         "Expecting 'SET' in set statement\n");
-    } else {
-        Tree_node* set = make_node(SET);
-        set->child1 = handle_VAR(current, log);
-        set->child2 = handle_LIST(current, log);
-        #ifdef INTERP
-        if (log->executing) {
-            lisp_free(set->child1->list); set->child1->list = NULL;
-            Lisp** var_p = &(log->variables[set->child1->var_name - 'A']);
-            if (*var_p != NULL) {
-                lisp_free(*var_p); *var_p = NULL;
-            }
-            *var_p = lisp_copy(set->child2->list);
-            lisp_free(set->child2->list); set->child2->list = NULL;
-        }
-        #endif
-        return set;
     }
+    Tree_node* set = make_node(SET); 
+    set->child1 = handle_VAR(current, log);
+    set->child2 = handle_LIST(current, log);
+    #ifdef INTERP
+    if (log->executing) {
+        lisp_free(set->child1->list); set->child1->list = NULL;
+        Lisp** var_p = &(log->variables[set->child1->var_name - 'A']);
+        if (*var_p != NULL) {
+            lisp_free(*var_p); *var_p = NULL;
+        }
+        *var_p = lisp_copy(set->child2->list);
+        lisp_free(set->child2->list); set->child2->list = NULL;
+    }
+    #endif
+    return set;
 }
 
 bool is_IF(Token_node* current) {
@@ -808,43 +807,43 @@ void parse_test(void) {
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_set;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_variable;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_greater;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_less;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_equal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_length;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
@@ -995,21 +994,80 @@ void parse_test(void) {
     assert(test_print_node->type == PRINT);
     assert(test_print_node->child1->type == LIST);
     assert(test_print_node->child1->child1->type == LITERAL);
-    assert(current->value->type == t_nil);
+    assert(current->value->type == t_set);
     assert(test_log->num_errors == 5);
     free_node(test_print_node);
     // token is nil -> should return an ERROR node, and add an error to the log
     test_print_node = handle_PRINT(&current, test_log);
     assert(test_print_node->type == ERROR_NODE);
-    assert(current->value->type == t_nil);
+    assert(current->value->type == t_set);
     assert(test_log->num_errors == 6);
     assert(strcmp(test_log->errors[5]->message, 
     "Expecting 'PRINT' in print statement\n") == 0);
     free_node(test_print_node);
     
+    // handle_SET()
+    // token is set-variable-literal -> should return a SET node with a VAR node at child1 and a LIST node at child2, which in turn has a LITERAL node at child1
+    Tree_node* test_set_node = handle_SET(&current, test_log);
+    assert(test_set_node->type == SET);
+    assert(test_set_node->child1->type == VAR);
+    assert(test_set_node->child2->type == LIST);
+    assert(test_set_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_greater);
+    assert(test_log->num_errors == 6);
+    free_node(test_set_node);
+    // token is greater -> should return an ERROR node, and add an error to the log
+    test_set_node = handle_SET(&current, test_log);
+    assert(test_set_node->type == ERROR_NODE);
+    assert(current->value->type == t_greater);
+    assert(test_log->num_errors == 7);
+    assert(strcmp(test_log->errors[6]->message, 
+    "Expecting 'SET' in set statement\n") == 0);
+    free_node(test_set_node);
     
     
-    
+    // handle_BOOLFUNC()
+    // token is greater-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
+    Tree_node* test_bool_node = handle_BOOLFUNC(&current, test_log);
+    assert(test_bool_node->type == BOOLFUNC);
+    assert(test_bool_node->func_type == t_greater)
+    assert(test_bool_node->child1->type == LIST);
+    assert(test_bool_node->child1->child1->type == LITERAL);
+    assert(test_bool_node->child2->type == LIST);
+    assert(test_bool_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_less);
+    assert(test_log->num_errors == 7);
+    free_node(test_bool_node);
+    // token is less-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
+    test_bool_node = handle_BOOLFUNC(&current, test_log);
+    assert(test_bool_node->type == BOOLFUNC);
+    assert(test_bool_node->func_type == t_less)
+    assert(test_bool_node->child1->type == LIST);
+    assert(test_bool_node->child1->child1->type == LITERAL);
+    assert(test_bool_node->child2->type == LIST);
+    assert(test_bool_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_eqaul);
+    assert(test_log->num_errors == 7);
+    free_node(test_bool_node);
+    // token is equal-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
+    test_bool_node = handle_BOOLFUNC(&current, test_log);
+    assert(test_bool_node->type == BOOLFUNC);
+    assert(test_bool_node->func_type == t_equal)
+    assert(test_bool_node->child1->type == LIST);
+    assert(test_bool_node->child1->child1->type == LITERAL);
+    assert(test_bool_node->child2->type == LIST);
+    assert(test_bool_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_length);
+    assert(test_log->num_errors == 7);
+    free_node(test_bool_node);
+    // token is length -> should return an ERROR node, and add an error to the log
+    test_bool_node = handle_BOOLFUNC(&current, test_log);
+    assert(test_bool_node->type == ERROR_NODE);
+    assert(current->value->type == t_length);
+    assert(test_log->num_errors == 8);
+    assert(strcmp(test_log->errors[7]->message, 
+    "Expecting 'LESS', 'GREATER', or 'EQUAL' in bool function\n") == 0);
+    free_node(test_bool_node);
     
     
    

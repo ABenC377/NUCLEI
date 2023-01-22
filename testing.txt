@@ -77,7 +77,7 @@ there are also some printing functions, which can't be silently tested for obvio
 
 Further, there are the functions free_tree(), free_node() and free_log(), which are used to avoid memory leaks.  Because memory leaks can't be effectively assert tested, these have not been tested in the test() functions.  However, they are used in these functions (and the actual running of the program), and it can be seen from running the program in valgrind that there are no memory leaks.  Therefore, we can be confident that they work in freeing all memory in all of the assert tested cases (which are, for the reasons explained elsewhere in this document, comprehensively cover the complete usage of this code).
 
-I've adopted a 'bottom-up' approach to testing the recursive functions in this part of the code.  Because the entire lexer is a recursive call tree, there is no way to test the top functions (i.e., the functions that is called first) without calling all the other functions.  Therefore, my parser_test() function first assert tests the terminal functions (e.g., the functions that handle variables, strings and literals) and then, when we are confident that these work as intended we can take it as a given and test the functions that call them, and so on until we reach to top function.  The full order of this explained below.
+I've adopted a 'bottom-up' approach to testing the recursive functions in this part of the code.  Because the entire lexer is a recursive call tree, there is no way to test the top functions (i.e., the functions that is called first) without calling all the other functions.  This would mean that testing the top functions straight away would require testing all possible permutations of the lower permutations (big O of (n!) -- clearly not feasible).  Therefore, my parser_test() function first assert tests the terminal functions (e.g., the functions that handle variables, strings and literals) and then, when we are confident that these work as intended we can take it as a given and test the functions that call them without testing the full functionality of the lower functions.  We continue working up in this way until we reach to top function.  The full order of this explained below.
 
 Structure of the recursive call tree:
 
@@ -131,6 +131,11 @@ After handle_LIST(), the next ones up are handle_PRINT(), handle_SET(), handle_B
 handle_PRINT()
     This function checks that the current token is PRINT, and (if it is) either calls handle_STRING() or handle_LIST(), depending on whether the token after PRINT is t_string or not.  If the current token is not PRINT, then it adds an error and returns an ERROR node.  Therefore, This has been tested to confirm that these three modes of operation are correct - against a print->string sequence, a print->non-string sequence, and a non-print sequence of tokens.
 
+handle_SET()
+    This function checks that the current token is SET.  If it isn't then it returns an ERROR node, and adds an error message.  If it is, then returns a SET node, with a VAR node at child1 and a LIST node at child2.  Therefore, there are two eventualities to test here: 1) the first token is set, and 2) the first token is not set.  Both modes of operation are shown to work correctly in the assert testing.
+    
+handle_BOOLFUNC()
+    This function checks that the current token is one of LESS, GREATER or EQUAL.  If it is, then it returns a BOOLFUNC node with LIST nodes at child1 and child2.  If it isn't, then it retusn an ERROR node and adds an error message.  I have tested this in each of the four intended runnning situations, and used assert testing to confirm that the output is as intended.  Further, this function sets the 'func_type' property of the BOOL node to either greater, less or equal - this has been assert tested as well.
 
 ___Interpreter testing___
 
