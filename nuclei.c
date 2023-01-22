@@ -295,21 +295,20 @@ bool is_INTFUNC(Token_node* current) {
 }
 
 Tree_node* handle_INTFUNC(Token_node** current, Prog_log* log) {
-    Tree_node* int_function = make_node(INTFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 2, t_plus, t_length)) {
         return parser_fails(log, (*current)->value, 
-        "Expecting 'PLUS' or 'LENGTH' in unteger function\n");
-    } else {
-        int_function->func_type = type;
-        int_function->child1 = handle_LIST(current, log);
+        "Expecting 'PLUS' or 'LENGTH' in integer function\n");
     }
+    Tree_node* int_function = make_node(INTFUNC);
+    int_function->func_type = type;
+    int_function->child1 = handle_LIST(current, log);
     if (type == t_plus) {
         int_function->child2 = handle_LIST(current, log);
     }
     #ifdef INTERP
-        int_function->list = evaluate_int_function((*current), type, log, &(int_function->child1->list),
-        (type == t_plus) ? &(int_function->child2->list) : NULL);
+    int_function->list = evaluate_int_function((*current), type, log, &(int_function->child1->list),
+    (type == t_plus) ? &(int_function->child2->list) : NULL);
     #endif
     return int_function;
 }
@@ -724,8 +723,8 @@ void test(void) {
 }
 
 void parse_test(void) {
-    // make_node()
     
+    // make_node()
     Tree_node* test_node = make_node(PROG);
     assert(test_node);
     assert(test_node->type == PROG);
@@ -752,7 +751,7 @@ void parse_test(void) {
     free(test_node);
     
 
-    // Setting up token list for the following assert testing
+    // Setting up token list for assert testing the recursive descent 'handle_' functions
     Token_list* test_tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Prog_log* test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
     Token* test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -844,6 +843,54 @@ void parse_test(void) {
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_length;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_plus;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_CAR;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_CDR;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_CONS;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
@@ -1025,12 +1072,11 @@ void parse_test(void) {
     "Expecting 'SET' in set statement\n") == 0);
     free_node(test_set_node);
     
-    
     // handle_BOOLFUNC()
     // token is greater-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
     Tree_node* test_bool_node = handle_BOOLFUNC(&current, test_log);
     assert(test_bool_node->type == BOOLFUNC);
-    assert(test_bool_node->func_type == t_greater)
+    assert(test_bool_node->func_type == t_greater);
     assert(test_bool_node->child1->type == LIST);
     assert(test_bool_node->child1->child1->type == LITERAL);
     assert(test_bool_node->child2->type == LIST);
@@ -1041,18 +1087,18 @@ void parse_test(void) {
     // token is less-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
     test_bool_node = handle_BOOLFUNC(&current, test_log);
     assert(test_bool_node->type == BOOLFUNC);
-    assert(test_bool_node->func_type == t_less)
+    assert(test_bool_node->func_type == t_less);
     assert(test_bool_node->child1->type == LIST);
     assert(test_bool_node->child1->child1->type == LITERAL);
     assert(test_bool_node->child2->type == LIST);
     assert(test_bool_node->child2->child1->type == LITERAL);
-    assert(current->value->type == t_eqaul);
+    assert(current->value->type == t_equal);
     assert(test_log->num_errors == 7);
     free_node(test_bool_node);
     // token is equal-literal-literal -> should return a BOOL node with LIST nodes at child1 and child2, which each, in turn, have a LITERAL node at child1
     test_bool_node = handle_BOOLFUNC(&current, test_log);
     assert(test_bool_node->type == BOOLFUNC);
-    assert(test_bool_node->func_type == t_equal)
+    assert(test_bool_node->func_type == t_equal);
     assert(test_bool_node->child1->type == LIST);
     assert(test_bool_node->child1->child1->type == LITERAL);
     assert(test_bool_node->child2->type == LIST);
@@ -1069,6 +1115,46 @@ void parse_test(void) {
     "Expecting 'LESS', 'GREATER', or 'EQUAL' in bool function\n") == 0);
     free_node(test_bool_node);
     
+    // handle_INTFUNC()
+    // token is length-literal -> should return an INT node with a LIST node at child1, which, in turn, has a LITERAL node at child1
+    Tree_node* test_int_node = handle_INTFUNC(&current, test_log);
+    assert(test_int_node->type == INTFUNC);
+    assert(test_int_node->func_type == t_length);
+    assert(test_int_node->child1->type == LIST);
+    assert(test_int_node->child1->child1->type == LITERAL);
+    assert(current->value->type == t_plus);
+    assert(test_log->num_errors == 8);
+    free_node(test_int_node);
+    // token is plus-literal-literal -> should return an INT node with LIST nodes at child1 and child2, each of which, in turn, has a LITERAL node at child1
+    test_int_node = handle_INTFUNC(&current, test_log);
+    assert(test_int_node->type == INTFUNC);
+    assert(test_int_node->func_type == t_plus);
+    assert(test_int_node->child1->type == LIST);
+    assert(test_int_node->child1->child1->type == LITERAL);
+    assert(test_int_node->child2->type == LIST);
+    assert(test_int_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_CAR);
+    assert(test_log->num_errors == 8);
+    free_node(test_int_node);
+    // token is t_CAR -> should return an ERROR node, and add an error to the log
+    test_int_node = handle_INTFUNC(&current, test_log);
+    assert(test_int_node->type == ERROR_NODE);
+    assert(current->value->type == t_CAR);
+    assert(test_log->num_errors == 9);
+    assert(strcmp(test_log->errors[8]->message, 
+    "Expecting 'PLUS' or 'LENGTH' in integer function\n") == 0);
+    free_node(test_int_node);
+    
+    // handle_LISTFUNC()
+    // token is length-literal -> should return an INT node with a LIST node at child1, which, in turn, has a LITERAL node at child1
+    test_list_node = handle_LISTFUNC(&current, test_log);
+    assert(test_list_node->type == LISTFUNC);
+    assert(test_list_node->func_type == t_CAR);
+    assert(test_list_node->child1->type == LIST);
+    assert(test_list_node->child1->child1->type == LITERAL);
+    assert(current->value->type == t_CDR);
+    assert(test_log->num_errors == 9);
+    free_node(test_list_node);
     
    
     free_token_list(test_tokens);

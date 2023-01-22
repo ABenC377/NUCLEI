@@ -137,5 +137,8 @@ handle_SET()
 handle_BOOLFUNC()
     This function checks that the current token is one of LESS, GREATER or EQUAL.  If it is, then it returns a BOOLFUNC node with LIST nodes at child1 and child2.  If it isn't, then it retusn an ERROR node and adds an error message.  I have tested this in each of the four intended runnning situations, and used assert testing to confirm that the output is as intended.  Further, this function sets the 'func_type' property of the BOOL node to either greater, less or equal - this has been assert tested as well.
 
+handle_INTFUNC()
+    This function checks whether the immediate token is PLUS or LENGTH.  If it is, and the token type is PLUS, then it returns an INT node (of type t_plus) with a LIST node on both child1 and child2.  If it isn't PLUS, then it returns an INT node (of type t_length) with a LIST node on child1.  If the immediate token is neither PLUS not LENGTH, then the function returns an ERROR node, and adds an error to the log.  As with handle_BOOLFUNC(), handle_INTFUNC() also sets the type of the returned tree node.  This has been assert tested to confirm that these three possible modes of operation work as intended.  
+
 ___Interpreter testing___
 
