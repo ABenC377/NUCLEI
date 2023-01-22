@@ -751,10 +751,10 @@ void parse_test(void) {
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_variable;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_string;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
@@ -792,11 +792,39 @@ void parse_test(void) {
     assert(strcmp(test_log->errors[0]->message, "Expecting 'NIL'\n") == 0);
     free_node(test_nil_node);
     
-    
     // handle_LITERAL()
-    
+    // current is at a LITERAL token, so should make a valid tree node
+    // and move the current pointer on one.
+    Tree_node* test_literal_node = handle_LITERAL(&current, test_log);
+    assert(test_literal_node->type == LITERAL);
+    assert(current->value->type == t_variable);
+    assert(test_log->num_errors == 1);
+    free_node(test_literal_node);
+    // current is now at a variable token, so should return a NULL pointer, add
+    // an error to the log, and not move the current pointer on.
+    test_literal_node = handle_LITERAL(&current, test_log);
+    assert(test_literal_node->type == ERROR_NODE);
+    assert(current->value->type == t_variable);
+    assert(test_log->num_errors == 2);
+    assert(strcmp(test_log->errors[1]->message, "Expecting literal\n") == 0);
+    free_node(test_literal_node);
     
     // handle_VAR()
+    // current is at a variable token, so should make a valid tree node
+    // and move the current pointer on one.
+    Tree_node* test_variable_node = handle_VAR(&current, test_log);
+    assert(test_variable_node->type == LITERAL);
+    assert(current->value->type == t_string);
+    assert(test_log->num_errors == 2);
+    free_node(test_variable_node);
+    // current is now at a string token, so should return a NULL pointer, add
+    // an error to the log, and not move the current pointer on.
+    test_variable_node = handle_VAR(&current, test_log);
+    assert(test_variable_node->type == ERROR_NODE);
+    assert(current->value->type == t_string);
+    assert(test_log->num_errors == 3);
+    assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
+    free_node(test_variable_node);
     
     
     // handle_STRING()
