@@ -532,7 +532,8 @@ Tree_node* handle_STRING(Token_node** current, Prog_log* log) {
         *current = (*current)->next;
         return string;
     } else {
-        return parser_fails(log, (*current)->value, "Expecting string\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting string\n");
     }
 }
 
@@ -683,7 +684,8 @@ void print_log(Prog_log* log) {
         fprintf(stderr, "ERROR LOG:\n");
     }
     for (int i = 0; i < log->num_errors; i++) {
-        fprintf(stderr, "Er%i, L%i C%i - %s", i + 1, log->errors[i]->line, log->errors[i]->col, log->errors[i]->message);
+        fprintf(stderr, "Er%i, L%i C%i - %s", i + 1, 
+        log->errors[i]->line, log->errors[i]->col, log->errors[i]->message);
     }
     if (log->overflow) {
         fprintf(stderr, "More than 20 parsing errors.  Not printing any more.\n");
