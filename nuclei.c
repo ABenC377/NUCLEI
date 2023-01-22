@@ -420,9 +420,7 @@ Tree_node* handle_LIST(Token_node** current, Prog_log* log) {
         return parser_fails(log, (*current)->value, "Expecting variable, literal, 'nil' or return function in list\n");
     }
     #ifdef INTERP
-    if (type != t_nil) {
-        list->list = (log->executing) ? move_list(&(list->child1->list)) : NULL;
-    }
+    list->list = (log->executing && (type != t_nil)) ? move_list(&(list->child1->list)) : NULL;
     #endif
     return list;
 }
