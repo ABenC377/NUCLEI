@@ -6,76 +6,62 @@
 # In this way ./parse & ./interp can both be built from the same source file.
 
 CC      := gcc
-CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 
-DEBUG   := $(CFLAGS) -g3 -fsanitize=undefined -fsanitize=address
-VFLAGS  := $(CFLAGS) -g3
-PROD    := $(CFLAGS) -O3
+DEBUG   := -g3
+OPTIM   := -O3
+CFLAGS  := -Wall -Wextra -Wpedantic -Wfloat-equal -Wvla -std=c99 -Werror
+RELEASE := $(CFLAGS) $(OPTIM)
+SANI    := $(CFLAGS) -fsanitize=undefined -fsanitize=address $(DEBUG)
+VALG    := $(CFLAGS)  $(DEBUG)
+NCLS    := $(wildcard *.ncl)
+PRES := $(NCLS:.ncl=.pres)
+IRES := $(NCLS:.ncl=.ires)
+ERES := $(NCLS:.ncl=.eres)
+LIBS    := -lm
 
-all: parse parse_debug parse_valgrind interp interp_debug interp_valgrind extension extension_debug extension_valgrind
-	
+
 parse: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o parse $(PROD)
+	$(CC)  nuclei.c lexical_parser.c lisp.c $(RELEASE) -o parse $(LIBS)
 
-parse_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o parse_s $(DEBUG)
+parse_s: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(SANI) -o parse_s $(LIBS)
 
-parse_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o parse_v $(VFLAGS)	
-	
+parse_v: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(VALG) -o parse_v $(LIBS)
+
+all: parse parse_s parse_v interp interp_s interp_v
+
 interp: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o interp -DINTERP $(PROD)
+	$(CC) nuclei.c lexical_parser.c lisp.c $(RELEASE) -DINTERP -o interp $(LIBS)
 
-interp_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o interp_s -DINTERP $(DEBUG)
+interp_s: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(SANI) -DINTERP -o interp_s $(LIBS)
 
-interp_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
-	$(CC) nuclei.c lexical_parser.c lisp.c -o interp_v -DINTERP $(VFLAGS)	
+interp_v: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(VALG) -DINTERP -o interp_v $(LIBS)
 	
 extension: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o ext -DINTERP -DEXT $(PROD)
+	$(CC) nuclei.c lexical_parser.c lisp.c $(RELEASE) -DINTERP -DEXT -o extension $(LIBS)
 
-extension_debug: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	$(CC) nuclei.c lexical_parser.c lisp.c -o ext_s -DINTERP -DEXT $(DEBUG)
+extension_s: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(SANI) -DINTERP -DEXT -o extension_s $(LIBS)
 
-extension_valgrind: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h 
-	$(CC) nuclei.c lexical_parser.c lisp.c -o ext_v -DINTERP -DEXT $(VFLAGS)	
+extension_v: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+	$(CC) nuclei.c lexical_parser.c lisp.c $(VALG) -DINTERP -DEXT -o extension_v $(LIBS)
 
-zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
-	zip -nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h
+# For all .ncl files, run them and output result to a .pres (prase result) 
+# or .ires (interpretted result) file.
+runall : ./parse_s ./interp_s ./extension_s $(PRES) $(IRES) $(ERES)
 
-run: parse_s interp_s ext_s
-	./parse_s test_code/basic_print.ncl
-	./parse_s test_code/demo1.ncl
-	./parse_s test_code/demo2.ncl
-	./parse_s test_code/demo3.ncl
-	./parse_s test_code/fibonacci.ncl
-	./parse_s test_code/inf_loop.ncl
-	./parse_s test_code/parse_fail.ncl
-	./parse_s test_code/parse_pass_interp_fail.ncl
-	./parse_s test_code/print_set.ncl
-	./parse_s test_code/simple_loop.ncl
-	./parse_s test_code/test.ncl
-	./parse_s test_code/triv.ncl
-	./interp_s test_code/basic_print.ncl
-	./interp_s test_code/demo1.ncl
-	./interp_s test_code/demo2.ncl
-	./interp_s test_code/demo3.ncl
-	./interp_s test_code/fibonacci.ncl
-	./interp_s test_code/parse_fail.ncl
-	./interp_s test_code/parse_pass_interp_fail.ncl
-	./interp_s test_code/print_set.ncl
-	./interp_s test_code/simple_loop.ncl
-	./interp_s test_code/test.ncl
-	./interp_s test_code/triv.ncl
-	./ext_s test_code/basic_print.ncl
-	./ext_s test_code/demo1.ncl
-	./ext_s test_code/demo2.ncl
-	./ext_s test_code/demo3.ncl
-	./ext_s test_code/fibonacci.ncl
-	./ext_s test_code/parse_fail.ncl
-	./ext_s test_code/parse_pass_interp_fail.ncl
-	./ext_s test_code/print_set.ncl
-	./ext_s test_code/simple_loop.ncl
-	./ext_s test_code/test.ncl
-	./ext_s test_code/triv.ncl
+%.pres:
+	-./parse_s  $*.ncl > $*.pres 2>&1
+%.ires:
+	-./interp_s $*.ncl > $*.ires 2>&1
+%.eres:
+	-./extension_s $*.ncl > $*.eres 2>&1
+
+clean:
+	rm -f parse parse_s parse_v interp interp_s interp_v extension extension_s extension_v $(PRES) $(IRES) $(ERES)
 	
+zip: nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
+	zip nuclei.zip nuclei.c nuclei.h lexical_parser.c lexical_parser.h lisp.c lisp.h Makefile
+

@@ -236,6 +236,10 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* log) {
     loop->child2 = handle_INSTRCTS(current, log);
     #ifdef INTERP
         if (execution_state && execute) {
+            *current = loop_start;
+            free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
+            loop = handle_LOOP(current, log);
+            log->executing = execution_state;
         }
         log->executing = (execution_state && !execute) ? true : log->executing;
     #endif
@@ -390,7 +394,7 @@ bool evaluate_bool(Token_node* node, Lisp* arg1, Lisp* arg2, Prog_log* log) {
     } else if (node->value->type == t_equal) {
         return (val1 == val2);
     } else {
-        return (val1 < val2);
+        return (val1 < val2); 
     }
 }
 
@@ -466,6 +470,11 @@ Tree_node* handle_LITERAL(Token_node** current, Prog_log* log) {
         #ifdef INTERP
         if (log->executing && is_invalid((*current)->value->lexeme)) {
             literal->type = ERROR_NODE;
+            Error* error = (Error*)allocate_space(1, sizeof(Error));
+            error->line = (*current)->value->line;
+            error->col = (*current)->value->line;
+            error->message = "INTERPRETER ERROR: invalid literal\n";
+            add_error(log, error, false);
         } else if (log->executing) {
             literal->list = lisp_from_string((*current)->value->lexeme);
         }
@@ -825,8 +834,8 @@ void parse_test(void) {
     assert(test_log->num_errors == 3);
     assert(strcmp(test_log->errors[2]->message, "Expecting a variable\n") == 0);
     free_node(test_variable_node);
-    
-    /*
+     
+    /*  
     // handle_STRING()
     // current is at a variable token, so should make a valid tree node
     // and move the current pointer on one.
