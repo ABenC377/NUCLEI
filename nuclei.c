@@ -796,6 +796,48 @@ void parse_test(void) {
     test_token->type = t_while;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_string;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -936,10 +978,34 @@ void parse_test(void) {
     assert(test_log->num_errors == 5);
     assert(strcmp(test_log->errors[4]->message, 
     "Expecting variable, literal, 'nil' or return function in list\n") == 0);
-    
     free_node(test_list_node);
     
+    current = current->next;
     
+    // handle_PRINT()
+    // token is print-string -> should return a PRINT node with a STRING node at child1
+    Tree_node* test_print_node = handle_PRINT(&current, test_log);
+    assert(test_print_node->type == PRINT);
+    assert(test_print_node->child1->type == STRING);
+    assert(current->value->type == t_print);
+    assert(test_log->num_errors == 5);
+    free_node(test_print_node);
+    // token is print-literal -> should return a PRINT node with a LIST node at child1, and a LITERAL node at child1 of that
+    test_print_node = handle_PRINT(&current, test_log);
+    assert(test_print_node->type == PRINT);
+    assert(test_print_node->child1->type == LIST);
+    assert(test_print_node->child1->child1->type == LITERAL);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 5);
+    free_node(test_print_node);
+    // token is nil -> should return an ERROR node, and add an error to the log
+    test_print_node = handle_PRINT(&current, test_log);
+    assert(test_print_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 6);
+    assert(strcmp(test_log->errors[5]->message, 
+    "Expecting 'PRINT' in print statement\n") == 0);
+    free_node(test_print_node);
     
     
     

@@ -126,7 +126,10 @@ The next level up the recursive tree, it becomes a bit more complicated, because
 Therefore, we are next testing handle_LIST().  
     handle_LIST() is a function that does a lot of heavy lifting, because the grammar for <LIST> allows four diecrete options, all of which need to be handled differently.  In brief, this function works out which of the four branches to take, and then calls a function to handle that branch (or returns an error if it is none of those four branches).  therefore, I have tested this function against tokens for each of VAR, LITERAL and NIL, as well as a RETFUNC, and an incorrect token.  I have tested that this returns the correct tree node for each of these eventualities.
 
+After handle_LIST(), the next ones up are handle_PRINT(), handle_SET(), handle_BOOLFUNC(), handle_INTFUNCT() and handle_LISTFUNCT().
 
+handle_PRINT()
+    This function checks that the current token is PRINT, and (if it is) either calls handle_STRING() or handle_LIST(), depending on whether the token after PRINT is t_string or not.  If the current token is not PRINT, then it adds an error and returns an ERROR node.  Therefore, This has been tested to confirm that these three modes of operation are correct - against a print->string sequence, a print->non-string sequence, and a non-print sequence of tokens.
 
 
 ___Interpreter testing___
