@@ -43,7 +43,8 @@ void parse_list(Token_list* list) {
 Tree_node* descend_recursively(Token_node** current, Prog_log* program_log) {
     Tree_node* program = make_node(PROG);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, (*current)->value, "Expecting opening parenthesis before instructions in program\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting opening parenthesis before instructions in program\n");
     } else {
         program->child1 = handle_INSTRCTS(current, program_log);
     }
@@ -52,7 +53,8 @@ Tree_node* descend_recursively(Token_node** current, Prog_log* program_log) {
 
 Tree_node* handle_INSTRCTS(Token_node** current, Prog_log* program_log) {
     if (!(*current)) {
-        return parser_fails(program_log, (*current)->value, "Expecting further instructions\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting further instructions\n");
     } else if (next_token_is(current, 1, t_r_parenthesis)) {
         return NULL;
     } else {
@@ -141,25 +143,22 @@ Tree_node* handle_IOFUNC(Token_node** current, Prog_log* program_log) {
 }
 
 Tree_node* handle_SET(Token_node** current, Prog_log* program_log) {
-    Tree_node* set = make_node(SET);
     if (!next_token_is(current, 1, t_set)) {
         return parser_fails(program_log, (*current)->value, 
         "Expecting 'SET' in set statement\n");
     } else {
+        Tree_node* set = make_node(SET);
         set->child1 = handle_VAR(current, program_log);
         set->child2 = handle_LIST(current, program_log);
         #ifdef INTERP
         if (program_log->executing) {
-            lisp_free(set->child1->list);
-            set->child1->list = NULL;
-            int var_index = set->child1->var_name - 'A';
-            if (program_log->variables[var_index] != NULL) {
-                lisp_free(program_log->variables[var_index]);
-                program_log->variables[var_index] = NULL;
+            lisp_free(set->child1->list); set->child1->list = NULL;
+            Lisp** var_p = &(program_log->variables[set->child1->var_name - 'A']);
+            if (*var_p != NULL) {
+                lisp_free(*var_p); *var_p = NULL;
             }
-            program_log->variables[var_index] = lisp_copy(set->child2->list);
-            lisp_free(set->child2->list);
-            set->child2->list = NULL;
+            *var_p = lisp_copy(set->child2->list);
+            lisp_free(set->child2->list); set->child2->list = NULL;
         }
         #endif
         return set;
@@ -171,26 +170,30 @@ bool is_IF(Token_node* current) {
 }
 
 Tree_node* handle_IF(Token_node** current, Prog_log* program_log) {
-    Tree_node* if_node = make_node(IF);
     if (!next_token_is(current, 1, t_if) || !next_token_is(current, 1, '(')) {
-        return parser_fails(program_log, (*current)->value, "Expecting IF before parenthesis in if statement.\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting IF before parenthesis in if statement.\n");
     }
+    Tree_node* if_node = make_node(IF);
     if_node->child1 = handle_BOOLFUNC(current, program_log);
     #ifdef INTERP
         bool execution_state = program_log->executing;
         bool execute = (lisp_get_val(if_node->child1->list) == 1);
-        lisp_free(if_node->child1->list);
-        if_node->child1->list = NULL;
+        lisp_free(if_node->child1->list); if_node->child1->list = NULL;
     #endif
     if (!next_token_is(current, 1, ')') || !next_token_is(current, 1, '(')) {
-        return parser_fails(program_log, (*current)->value, "Expecting parentheses between bool and first statement in if statement.\n");
+        free_node(if_node);
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting parentheses between bool and first statement in if statement.\n");
     }
     #ifdef INTERP
         program_log->executing = (execution_state == true && execute == true);
     #endif
     if_node->child2 = handle_INSTRCTS(current, program_log);
     if (!next_token_is(current, 1, t_l_parenthesis)) {
-        return parser_fails(program_log, (*current)->value, "Expecting opening parenthesis before second instructions in if statement\n");
+        free_node(if_node);
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting opening parenthesis before second instructions in if statement\n");
     }
     #ifdef INTERP
         program_log->executing = (execution_state == true && execute == false);
@@ -210,10 +213,11 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
     #ifdef INTERP
         Token_node* loop_start = (*current);
     #endif
-    Tree_node* loop = make_node(LOOP);
     if (!next_token_is(current, 1, t_while) || !next_token_is(current, 1, '(')) {
-        return parser_fails(program_log, (*current)->value, "Expecting WHILE and opening parenthesis before bool function in loop\n");
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting WHILE and opening parenthesis before bool function in loop\n");
     }
+    Tree_node* loop = make_node(LOOP);
     loop->child1 = handle_BOOLFUNC(current, program_log);
     #ifdef INTERP
         bool execution_state = program_log->executing;
@@ -222,7 +226,9 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* program_log) {
         loop->child1->list = NULL;
     #endif
     if (!next_token_is(current, 1, ')') || !next_token_is(current, 1, '(')) {
-        return parser_fails(program_log, (*current)->value, "Expecting parentheses between bool and instructions within loop\n");
+        free_node(loop);
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting parentheses between bool and instructions within loop\n");
     }
     #ifdef INTERP
         program_log->executing = (execution_state && !execute) ? false : program_log->executing;
@@ -246,20 +252,19 @@ bool is_LISTFUNC(Token_node* current) {
 }
 
 Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* program_log) {
-    Tree_node* list_function = make_node(LISTFUNC);
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 3, t_CAR, t_CDR, t_CONS)) {
-        return parser_fails(program_log, (*current)->value, "Expecting 'CAR', 'CDR', or 'CONS' in list function");
-    } else {
-        list_function->func_type = type;
+        return parser_fails(program_log, (*current)->value, 
+        "Expecting 'CAR', 'CDR', or 'CONS' in list function");
     }
+    Tree_node* list_function = make_node(LISTFUNC);
+    list_function->func_type = type;
     list_function->child1 = handle_LIST(current, program_log);
-    if (type == t_CONS) {
-        list_function->child2 = handle_LIST(current, program_log);
-    }
+    list_function->child2 = (type == t_CONS) ? handle_LIST(current, program_log) : NULL;
     #ifdef INTERP
     if (program_log->executing) {
-        list_function->list = evaluate_list_function(type, list_function->child1->list, (type == t_CONS) ? list_function->child2->list : NULL);
+        list_function->list = evaluate_list_function(type, list_function->child1->list, 
+        (type == t_CONS) ? list_function->child2->list : NULL);
         list_function->child1->list = NULL;
         if (type == t_CONS) {
             list_function->child2->list = NULL;
