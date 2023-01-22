@@ -94,7 +94,7 @@ Structure of the recursive call tree:
         |-----------------------------------------------------------------------------------------------
         |                                                       |                   |                   |
         v                                                       v                   v                   v
- -> handle_RETFUNC()                                        handle_IOFUNC()*    handle_IF()*        handle_LOOP()
+ -> handle_RETFUNC()                                        handle_LOOP()*      handle_IF()*        handle_IOFUNC()
 |       |---------------------------------------     -----------|-------------------|                   |
 |       |                   |                   |   |                                        ---------------
 |       v                   v                   v   v                                       |               |
@@ -139,6 +139,26 @@ handle_BOOLFUNC()
 
 handle_INTFUNC()
     This function checks whether the immediate token is PLUS or LENGTH.  If it is, and the token type is PLUS, then it returns an INT node (of type t_plus) with a LIST node on both child1 and child2.  If it isn't PLUS, then it returns an INT node (of type t_length) with a LIST node on child1.  If the immediate token is neither PLUS not LENGTH, then the function returns an ERROR node, and adds an error to the log.  As with handle_BOOLFUNC(), handle_INTFUNC() also sets the type of the returned tree node.  This has been assert tested to confirm that these three possible modes of operation work as intended.  
+    
+handle_LISTFUNC()
+    This function returns a LISTFUNC node if the current token is either CAR, CDR or CONS.  Otherwise, it returns an ERROR node.  Assert testing confirms that each of these four modes of operation works as intended.
+    
+The next layer of functions is handle_IOFUNC() and handle_RETFUNC() (the later of which we have taken the correctness of for granted up until now).  
+
+handle_RETFUNC()
+    This function returns a RETFUNC node with a child1 that is either a LISTFUNC, INTFUNC or BOOLFUNC, depending on what the current tokens are.  If the current tokens are none of the above, then this function returns an ERROR node and adds an error message to the log.  This has been assert tested to confirm that, when presented with a LISTFUNC, INTFUNC, or BOOLFUNC it produces the right type of tree node, and when presented with none of the above, it returns an error, as intended.
+    
+handle_IOFUNC()
+    this function calls handle_SET() if the current token is t_set, or handle_PRINT() if the current token is t_print.  Otherwise, it returns an ERROR node, and adds an error message to the log.  Assert testing confirms that each of these three modes of operation works as intended.
+
+After this, there is another complication - each of handle_LOOP() and handle_IF() call handle_INSTRCTS().  As with handle_RETFUNC() previously, this is higher up the recursive chain than these functions which are calling it.  Therefore, we are again going to (for the time being) trust that it works as it should before demonstrating it with assert testing later on.  For now, we will use 't_l_parenthesis->t_print->t_literal->t_r_parenthesis->t_r_parenthesis' as the sequence of tokens that we know are a valid INSTRCTS (they should produce an INSTRCTS->INSTRCT->FUNC->IOFUNC->PRINT->LIST->LITERAL chain of tree nodes).  
+
+handle_LOOP()
+    This function does some heavy lifting because of the number of tokens in a LOOP.  It checks for the presence of a WHILE token and a ( token (in that order).  If either are missing, it returns an ERROR node, and adds an error to the log.  If this is passed, it adds a BOOL node to child1, and continues checking for ) and ( tokens (in that order).  If either of these are missing, it returns an ERROR node.  If this is passed, then it adds an INSTRCTS node to child2.  assert testing shows that this series of tokens results in a valid LOOP node being returned.  Otherwise, if the series of WHILE and parentheses is incorrect, it returns an ERROR node.  I.e., the assert testing shows that this function works as it should (assuming that handle_INSTRCTS(), which it calls, is functioning correctly).
+
+handle_IF()
+    like handle_LOOP(), this function also does some heavy lifting due to the number of tokens involved in an IF.  Specifically, it should check for IF and ( (returning ERROR if not present), then add BOOLFUNC to child1, then check for ) and ( (returing ERROR if not present), then add INSTRCS to child2, then check for ( (returingin ERRO if not present), and finally adding INSTRCTS to child 3.  Assert testing shows that a correct series of tokens results in a valid IF node being returned.  Additionally, assert testing shows that the absence of any one of the tokens results in an ERROR being returned.  Therefore, assert testing shows that this function works as intended.
+
 
 ___Interpreter testing___
 

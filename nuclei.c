@@ -112,6 +112,7 @@ Tree_node* handle_RETFUNC(Token_node** current, Prog_log* log) {
     } else if (is_BOOLFUNC(*current)) {
         ret_function->child1 = handle_BOOLFUNC(current, log);
     } else {
+        free_node(ret_function);
         return parser_fails(log, (*current)->value, 
         "Expecting list, int, or bool function in return function\n");
     }
@@ -136,6 +137,7 @@ Tree_node* handle_IOFUNC(Token_node** current, Prog_log* log) {
     } else if ((*current)->value->type == t_print) {
         io_function->child1 = handle_PRINT(current, log);
     } else {
+        free_node(io_function);
         return parser_fails(log, (*current)->value, 
         "Expecting 'SET' or 'PRINT' in I/O function\n");
     }
@@ -210,7 +212,7 @@ bool is_LOOP(Token_node* current) {
 
 Tree_node* handle_LOOP(Token_node** current, Prog_log* log) {
     #ifdef INTERP
-        Token_node* loop_start = (*current);
+    Token_node* loop_start = (*current);
     #endif
     if (!next_token_is(current, 1, t_while) || !next_token_is(current, 1, '(')) {
         return parser_fails(log, (*current)->value, 
@@ -219,10 +221,10 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* log) {
     Tree_node* loop = make_node(LOOP);
     loop->child1 = handle_BOOLFUNC(current, log);
     #ifdef INTERP
-        bool execution_state = log->executing;
-        bool execute = (lisp_get_val(loop->child1->list) == 1);
-        lisp_free(loop->child1->list);
-        loop->child1->list = NULL;
+    bool execution_state = log->executing;
+    bool execute = (lisp_get_val(loop->child1->list) == 1);
+    lisp_free(loop->child1->list);
+    loop->child1->list = NULL;
     #endif
     if (!next_token_is(current, 1, ')') || !next_token_is(current, 1, '(')) {
         free_node(loop);
@@ -230,17 +232,17 @@ Tree_node* handle_LOOP(Token_node** current, Prog_log* log) {
         "Expecting parentheses between bool and instructions within loop\n");
     }
     #ifdef INTERP
-        log->executing = (execution_state && !execute) ? false : log->executing;
+    log->executing = (execution_state && !execute) ? false : log->executing;
     #endif
     loop->child2 = handle_INSTRCTS(current, log);
     #ifdef INTERP
-        if (execution_state && execute) {
-            *current = loop_start;
-            free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
-            loop = handle_LOOP(current, log);
-            log->executing = execution_state;
-        }
-        log->executing = (execution_state && !execute) ? true : log->executing;
+    if (execution_state && execute) {
+        *current = loop_start;
+        free_node(loop); // To ensure that the replaced nodes are not just hanging in the heap
+        loop = handle_LOOP(current, log);
+        log->executing = execution_state;
+    }
+    log->executing = (execution_state && !execute) ? true : log->executing;
     #endif
     return loop;
 }
@@ -254,7 +256,7 @@ Tree_node* handle_LISTFUNC(Token_node** current, Prog_log* log) {
     token_type type = (*current)->value->type;
     if (!next_token_is(current, 3, t_CAR, t_CDR, t_CONS)) {
         return parser_fails(log, (*current)->value, 
-        "Expecting 'CAR', 'CDR', or 'CONS' in list function");
+        "Expecting 'CAR', 'CDR', or 'CONS' in list function\n");
     }
     Tree_node* list_function = make_node(LISTFUNC);
     list_function->func_type = type;
@@ -754,19 +756,19 @@ void parse_test(void) {
     // Setting up token list for assert testing the recursive descent 'handle_' functions
     Token_list* test_tokens = (Token_list*)allocate_space(1, sizeof(Token_list));
     Prog_log* test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
-    Token* test_token = (Token*)allocate_space(1, sizeof(Token));
+    Token* test_token = (Token*)allocate_space(1, sizeof(Token)); // NIL testing
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // LITERAL testing
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // VAR testing
     test_token->type = t_variable;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // STRING testing
     test_token->type = t_string;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // LIST testing
     test_token->type = t_variable;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -793,7 +795,7 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_while;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // PRINT testing
     test_token->type = t_print;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -805,7 +807,7 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // SET testing
     test_token->type = t_set;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -814,7 +816,7 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // BOOLFUNC testing
     test_token->type = t_greater;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -841,7 +843,7 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // INTFUNC testing
     test_token->type = t_length;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -856,7 +858,7 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
-    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // LISTFUNC testing
     test_token->type = t_CAR;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -877,28 +879,286 @@ void parse_test(void) {
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_literal;
     add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // RETFUNC testing
+    test_token->type = t_length;
+    add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_CAR;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // IOFUNC testing
+    test_token->type = t_set;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_variable;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // LOOP testing
+    test_token->type = t_while;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_while;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
-    test_token->type = t_nil;
+    test_token->type = t_while;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_while;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // IF testing
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_equal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_string;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_string;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_if;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_less;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_l_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_print;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_literal;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_r_parenthesis;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->type = t_nil;
+    add_token(test_tokens, test_token);
+    test_token = (Token*)allocate_space(1, sizeof(Token)); // NEXT TESTING
     test_token->type = t_nil;
     add_token(test_tokens, test_token);
     test_token = (Token*)allocate_space(1, sizeof(Token));
@@ -1146,7 +1406,7 @@ void parse_test(void) {
     free_node(test_int_node);
     
     // handle_LISTFUNC()
-    // token is length-literal -> should return an INT node with a LIST node at child1, which, in turn, has a LITERAL node at child1
+    // token is CAR-literal -> should return an LISTFUNC node (type t_CAR) with a LIST node at child1, which, in turn, has a LITERAL node at child1
     test_list_node = handle_LISTFUNC(&current, test_log);
     assert(test_list_node->type == LISTFUNC);
     assert(test_list_node->func_type == t_CAR);
@@ -1155,7 +1415,167 @@ void parse_test(void) {
     assert(current->value->type == t_CDR);
     assert(test_log->num_errors == 9);
     free_node(test_list_node);
+    // token is CDR-literal -> should return a LISTFUNC node (type t_CDR) with LIST node at child1, which, in turn, has a LITERAL node at child1
+    test_list_node = handle_LISTFUNC(&current, test_log);
+    assert(test_list_node->type == LISTFUNC);
+    assert(test_list_node->func_type == t_CDR);
+    assert(test_list_node->child1->type == LIST);
+    assert(test_list_node->child1->child1->type == LITERAL);
+    assert(current->value->type == t_CONS);
+    assert(test_log->num_errors == 9);
+    free_node(test_list_node);
+    // token is CONS-literal-literal -> should return a LISTFUNC node (type t_CONS) with LIST nodes at child1 and child2, each of which, in turn, has a LITERAL node at child1
+    test_list_node = handle_LISTFUNC(&current, test_log);
+    assert(test_list_node->type == LISTFUNC);
+    assert(test_list_node->func_type == t_CONS);
+    assert(test_list_node->child1->type == LIST);
+    assert(test_list_node->child1->child1->type == LITERAL);
+    assert(test_list_node->child2->type == LIST);
+    assert(test_list_node->child2->child1->type == LITERAL);
+    assert(current->value->type == t_length);
+    assert(test_log->num_errors == 9);
+    free_node(test_list_node);
+    // token is t_length -> should return an ERROR node, and add an error to the log
+    test_list_node = handle_LISTFUNC(&current, test_log);
+    assert(test_list_node->type == ERROR_NODE);
+    assert(current->value->type == t_length);
+    assert(test_log->num_errors == 10);
+    assert(strcmp(test_log->errors[9]->message, 
+    "Expecting 'CAR', 'CDR', or 'CONS' in list function\n") == 0);
+    free_node(test_list_node);
     
+    // handle_RETFUNC()
+    // token is length-literal -> should return a RETFUNC, with an INTFUNC node at child1, with a LIST node at child1, which, in turn, has a LITERAL node at child1
+    Tree_node* test_ret_node = handle_RETFUNC(&current, test_log);
+    assert(test_ret_node->type == RETFUNC);
+    assert(test_ret_node->child1->type == INTFUNC);
+    assert(test_ret_node->child1->child1->type == LIST);
+    assert(test_ret_node->child1->child1->child1->type == LITERAL);
+    assert(current->value->type == t_CAR);
+    assert(test_log->num_errors == 10);
+    free_node(test_ret_node);
+    // token is CAR-literal -> should return a RETFUNC, with an LISTFUNC node at child1, with a LIST node at child1, which, in turn, has a LITERAL node at child1
+    test_ret_node = handle_RETFUNC(&current, test_log);
+    assert(test_ret_node->type == RETFUNC);
+    assert(test_ret_node->child1->type == LISTFUNC);
+    assert(test_ret_node->child1->child1->type == LIST);
+    assert(test_ret_node->child1->child1->child1->type == LITERAL);
+    assert(current->value->type == t_less);
+    assert(test_log->num_errors == 10);
+    free_node(test_ret_node);
+    // token is less-literal-literal -> should return a RETFUNC, with an BOOLFUNC node at child1, with a LIST node at child1 and child2, each of which, in turn, has a LITERAL node at child1
+    test_ret_node = handle_RETFUNC(&current, test_log);
+    assert(test_ret_node->type == RETFUNC);
+    assert(test_ret_node->child1->type == BOOLFUNC);
+    assert(test_ret_node->child1->child1->type == LIST);
+    assert(test_ret_node->child1->child1->child1->type == LITERAL);
+    assert(test_ret_node->child1->child2->type == LIST);
+    assert(test_ret_node->child1->child2->child1->type == LITERAL);
+    assert(current->value->type == t_set);
+    assert(test_log->num_errors == 10);
+    free_node(test_ret_node);
+    // token is t_set -> should return an ERROR node, and add an error to the log
+    test_ret_node = handle_RETFUNC(&current, test_log);
+    assert(test_ret_node->type == ERROR_NODE);
+    assert(current->value->type == t_set);
+    assert(test_log->num_errors == 11);
+    assert(strcmp(test_log->errors[10]->message, 
+    "Expecting list, int, or bool function in return function\n") == 0);
+    free_node(test_ret_node);
+    
+    // handle_IOFUNC()
+    // token is set-variable-literal -> should return an IOFUNC node, with a SET node at child1, which has a VAR node at child1 and a LIST node at child2, which, in turn, has a LITERAL node at child1
+    Tree_node* test_io_node = handle_IOFUNC(&current, test_log);
+    assert(test_io_node->type == IOFUNC);
+    assert(test_io_node->child1->type == SET);
+    assert(test_io_node->child1->child1->type == VAR);
+    assert(test_io_node->child1->child2->type == LIST);
+    assert(test_io_node->child1->child2->child1->type == LITERAL);
+    assert(current->value->type == t_print);
+    assert(test_log->num_errors == 11);
+    free_node(test_io_node);
+    // token is print-literal -> should return an IOFUNC node, with a PRINT node at child1, which has a LIST node at child1, which, in turn, has a LITERAL node at child1
+    test_io_node = handle_IOFUNC(&current, test_log);
+    assert(test_io_node->type == IOFUNC);
+    assert(test_io_node->child1->type == PRINT);
+    assert(test_io_node->child1->child1->type == LIST);
+    assert(test_io_node->child1->child1->child1->type == LITERAL);
+    assert(current->value->type == t_while);
+    assert(test_log->num_errors == 11);
+    free_node(test_io_node);
+    // token is t_while -> should return an ERROR node, and add an error to the log
+    test_io_node = handle_IOFUNC(&current, test_log);
+    assert(test_io_node->type == ERROR_NODE);
+    assert(current->value->type == t_while);
+    assert(test_log->num_errors == 12);
+    assert(strcmp(test_log->errors[11]->message, 
+    "Expecting 'SET' or 'PRINT' in I/O function\n") == 0);
+    free_node(test_io_node);
+    
+    // handle_LOOP()
+    // token is while->)->(->less->literal->literal->)->(->(->print->literal->)->) -> should return a LOOP node, with a BOOLFUNC node at child1 and an INSTRCTS node at child2
+    Tree_node* test_loop_node = handle_LOOP(&current, test_log);
+    assert(test_loop_node->type == LOOP);
+    assert(test_loop_node->child1->type == BOOLFUNC);
+    assert(test_loop_node->child1->child1->type == LIST);
+    assert(test_loop_node->child1->child1->child1->type == LITERAL);
+    assert(test_loop_node->child1->child2->type == LIST);
+    assert(test_loop_node->child1->child2->child1->type == LITERAL);
+    assert(test_loop_node->child2->type == INSTRCTS);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 12);
+    free_node(test_loop_node);
+    // token is t_nil -> should return an ERROR node (no t_while), and add an error to the log
+    test_loop_node = handle_LOOP(&current, test_log);
+    assert(test_loop_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 13);
+    assert(strcmp(test_log->errors[12]->message, 
+    "Expecting WHILE and opening parenthesis before bool function in loop\n") == 0);
+    free_node(test_loop_node);
+    current = current->next;
+    // token is t_while->t_nil -> should return an ERROR node (no t_l_parenthesis), and add an error to the log
+    test_loop_node = handle_LOOP(&current, test_log);
+    assert(test_loop_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 14);
+    assert(strcmp(test_log->errors[13]->message, 
+    "Expecting WHILE and opening parenthesis before bool function in loop\n") == 0);
+    free_node(test_loop_node);
+    current = current->next;
+    // token is t_while->t_l_parenthesis->t_nil->t_less->t_literal->t_literal -> should return an ERROR node (no t_r_parenthesis), and add an error to the log
+    test_loop_node = handle_LOOP(&current, test_log);
+    assert(test_loop_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 15);
+    assert(strcmp(test_log->errors[14]->message, 
+    "Expecting parentheses between bool and instructions within loop\n") == 0);
+    free_node(test_loop_node);
+    current = current->next;
+    // token is t_while->t_l_parenthesis->t_nil->t_less->t_literal->t_literal->t_r_parenthesis -> should return an ERROR node (no t_l_parenthesis), and add an error to the log
+    test_loop_node = handle_LOOP(&current, test_log);
+    assert(test_loop_node->type == ERROR_NODE);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 16);
+    assert(strcmp(test_log->errors[15]->message, 
+    "Expecting parentheses between bool and instructions within loop\n") == 0);
+    free_node(test_loop_node);
+    current = current->next;
+    
+    // handle_IF()
+    // token is while->)->(->less->literal->literal->)->(->(->print->literal->)->) -> should return a LOOP node, with a BOOLFUNC node at child1 and an INSTRCTS node at child2
+    Tree_node* test_if_node = handle_IF(&current, test_log);
+    assert(test_if_node->type == IF);
+    assert(test_if_node->child1->type == BOOLFUNC);
+    assert(test_if_node->child1->child1->type == LIST);
+    assert(test_if_node->child1->child1->child1->type == LITERAL);
+    assert(test_if_node->child1->child2->type == LIST);
+    assert(test_if_node->child1->child2->child1->type == LITERAL);
+    assert(test_if_node->child2->type == INSTRCTS);
+    assert(test_if_node->child3->type == INSTRCTS);
+    assert(current->value->type == t_nil);
+    assert(test_log->num_errors == 16);
+    free_node(test_if_node);
    
     free_token_list(test_tokens);
     free_log(test_log);
