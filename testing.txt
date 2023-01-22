@@ -159,6 +159,14 @@ handle_LOOP()
 handle_IF()
     like handle_LOOP(), this function also does some heavy lifting due to the number of tokens involved in an IF.  Specifically, it should check for IF and ( (returning ERROR if not present), then add BOOLFUNC to child1, then check for ) and ( (returing ERROR if not present), then add INSTRCS to child2, then check for ( (returingin ERRO if not present), and finally adding INSTRCTS to child 3.  Assert testing shows that a correct series of tokens results in a valid IF node being returned.  Additionally, assert testing shows that the absence of any one of the tokens results in an ERROR being returned.  Therefore, assert testing shows that this function works as intended.
 
+After this, there is a fairly linear route to the top of the recursive tree.  We will be testing, in this order, handle_FUNC(), handle_INSTRCT(), handle_INSTRCTS(), and descend_recursively().
+
+handle_FUNC()
+    This is a simple redirecting function.  It checks whether the next tokens are a RETFUNC, IOFUNC, IF, or LOOP, and then calls the respective handle_... function.  If the tokens are none of the above, then it returns and ERROR node.  Assert testing shows that this function works as it should in its five use cases.
+
+
+
+
 
 ___Interpreter testing___
 
