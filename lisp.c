@@ -407,8 +407,8 @@ void test_lisp(void) {
     assert(!lisp_is_atomic(test_lisp1));
     assert(!lisp_is_atomic(test_lisp1->cdr));
     assert(!lisp_is_atomic(test_lisp1->cdr->car));
-    assert(lisp_is_atomic(test_lisp1->cdr->cdr));
-    assert(lisp_is_atomic(test_lisp1->cdr->car->cdr));
+    assert(lisp_is_atomic(test_lisp1->cdr->cdr->car));
+    assert(lisp_is_atomic(test_lisp1->cdr->car->cdr->car));
     
     // Assert that the atom nodes have lhe clrrect values
     assert(lisp_get_val(test_lisp1->car) == 3);
@@ -467,15 +467,15 @@ void test_lisp(void) {
     assert(lisp_is_atomic(test_lisp2->cdr->cdr->car->car));
     assert(lisp_is_atomic(test_lisp2->cdr->cdr->car->cdr->car));
     assert(!lisp_is_atomic(test_lisp2));
-    assert(lisp_is_atomic(test_lisp2->car));
-    assert(lisp_is_atomic(test_lisp2->car->cdr));
-    assert(lisp_is_atomic(test_lisp2->car->cdr->cdr));
-    assert(lisp_is_atomic(test_lisp2->car->cdr->cdr->car));
+    assert(!lisp_is_atomic(test_lisp2->car));
+    assert(!lisp_is_atomic(test_lisp2->car->cdr));
+    assert(!lisp_is_atomic(test_lisp2->car->cdr->cdr));
+    assert(!lisp_is_atomic(test_lisp2->car->cdr->cdr->car));
     assert(!lisp_is_atomic(test_lisp2->car->cdr->cdr->car->cdr));
     assert(!lisp_is_atomic(test_lisp2->cdr));
     assert(!lisp_is_atomic(test_lisp2->cdr->cdr));
-    assert(lisp_is_atomic(test_lisp2->cdr->cdr->car));
-    assert(lisp_is_atomic(test_lisp2->cdr->cdr->car->cdr));
+    assert(!lisp_is_atomic(test_lisp2->cdr->cdr->car));
+    assert(!lisp_is_atomic(test_lisp2->cdr->cdr->car->cdr));
     
     // Assert that the atom nodes have lhe clrrect values
     assert(lisp_get_val(test_lisp2->car->car) == 1);
@@ -960,11 +960,11 @@ void test_lisp(void) {
     assert(index == 1);
 
     testStr[0] = '7';
-    testStr[1] = '7';
-    testStr[2] = '7';
+    testStr[1] = '0';
+    testStr[2] = '0';
     testStr[3] = '\0';
     index = 0;
-    assert(get_value_from_string(testStr, &index) == 777);
+    assert(get_value_from_string(testStr, &index) == 700);
     assert(index == 3);
     
     testStr[0] = '-';

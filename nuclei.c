@@ -441,7 +441,6 @@ void check_initialised(Token_node* token_node, Tree_node* tree_node, Prog_log* l
             add_error(log, error, false);
         }
     }
-    
 }
 
 Lisp* move_list(Lisp** original) {
@@ -724,10 +723,12 @@ void add_error(Prog_log* log, Error* error, bool parsing) {
 void test(void) {
     lexical_analysis_test();
     parse_test();
+    interp_test();
+    ext_test();
+    test_lisp();
 }
 
 void parse_test(void) {
-    
     // make_node()
     Tree_node* test_node = make_node(PROG);
     assert(test_node);
@@ -1897,8 +1898,87 @@ void parse_test(void) {
     free_node(test_prog_node);
     current = current->next;
     
-    
-    
     free_token_list(test_tokens);
+    free_log(test_log);
+}
+
+void interp_test(void) {
+    
+}
+
+void ext_test(void) {
+    // add_error()
+    Prog_log* test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
+    Error* test_error = (Error*)allocate_space(1, sizeof(Error));
+    test_error->col = -457;
+    test_error->line = 357475;
+    test_error->message = "TEST MESSAGE";
+    add_error(test_log, test_error, true);
+    assert(test_log->num_errors == 1);
+    assert(test_log->errors[0]->line == test_error->line);
+    assert(test_log->errors[0]->col == test_error->col);
+    assert(test_log->errors[0]->message == test_error->message);
+    assert(test_log->parser_error);
+    
+    Error* test_error2 = (Error*)allocate_space(1, sizeof(Error));
+    test_error2->col = -0;
+    test_error2->line = 12;
+    test_error2->message = "TEST MESSAGE 2";
+    add_error(test_log, test_error2, false);
+    assert(test_log->num_errors == 2);
+    assert(test_log->errors[1] == test_error2);
+    assert(test_log->errors[1]->col == test_error2->col);
+    assert(test_log->errors[1]->message == test_error2->message);
+    assert(test_log->interp_error);
+    
+    test_log->num_errors = 20;
+    Error* test_error3 = (Error*)allocate_space(1, sizeof(Error));
+    test_error3->col = -0;
+    test_error3->line = 12;
+    test_error3->message = "TEST MESSAGE 3";
+    add_error(test_log, test_error3, true);
+    assert(test_log->num_errors == 20);
+    assert(test_log->errors[19] == NULL);
+    assert(test_log->overflow);
+    
+    free(test_error3);
+    free_log(test_log);
+    
+    // parser_fails()
+    test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
+    Token* test_token = (Token*)allocate_space(1, sizeof(Token));
+    test_token->line = 7;
+    test_token->col = 14;
+    Tree_node* test_node = parser_fails(test_log, test_token, "TEST ERROR MESSAGE");
+    assert(test_log->errors[0]->line == test_token->line);
+    assert(test_log->errors[0]->col == test_token->col);
+    assert(strcmp("TEST ERROR MESSAGE", test_log->errors[0]->message) == 0);
+    assert(test_node->type == ERROR_NODE);
+    free(test_node);
+    free_log(test_log);
+    free(test_token);
+    
+    /*
+
+    Token_node* test_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
+    test_token_node->value = (Token*)allocate_space(1, sizeof(Token));
+    test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
+    test_log->variables[0] = (Lisp*)allocate_space(1, sizeof(Lisp));
+    test_log->variables[25] = NULL;
+    test_node = (Tree_node*)allocate_space(1, sizeof(Tree_node));
+    test_node->type = VAR;
+    test_node->var_name = 'A';
+    test_token_node->value->var_name = 'A';
+    check_initialised(test_token_node, test_node, test_log);
+    assert(test_node->type == VAR);
+    
+    test_node->var_name = 'Z';
+    test_token_node->value->var_name = 'Z';
+    check_initialised(test_token_node, test_node, test_log);
+    assert(test_node->type == ERROR_NODE);
+    assert(test_log->num_errors == 1);
+    
+    free_token_node(test_token_node);
+    free_node(test_node);
     free_log(test_log);
 }

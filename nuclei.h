@@ -117,3 +117,5 @@ void free_log(Prog_log* log);
 void add_error(Prog_log* log, Error* error, bool parsing);
 void test(void);
 void parse_test(void);
+void interp_test(void);
+void ext_test(void);

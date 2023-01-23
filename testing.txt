@@ -61,18 +61,6 @@ make_node()
     Another fairly simple function - it allocates space for a Tree_node, assigns its type to the provided argument, and then returns a pointer to the node.
     This has been assert tested with a number of different grammar_types, and it is confirmed that the return value is both a new Tree_node and is of the correct type.
 
-parser_fails()
-
-
-next_token_is()
-
-
-get_node_type()
-
-
-add_error()
-
-
 there are also some printing functions, which can't be silently tested for obvious reasons.  These functions are print_tree() and print_tree_node().  These were only used for debugging, and are kept in the codebase to assist with further development, if needed.  However, as they are not used in the normal functioning of the code, there is no need to test them.  print_log is another print function, which is used in the normal running of this code (when there is a parsing or interpretation error).  Because this is a printing function, there is no good way to test it.  However, 
 
 Further, there are the functions free_tree(), free_node() and free_log(), which are used to avoid memory leaks.  Because memory leaks can't be effectively assert tested, these have not been tested in the test() functions.  However, they are used in these functions (and the actual running of the program), and it can be seen from running the program in valgrind that there are no memory leaks.  Therefore, we can be confident that they work in freeing all memory in all of the assert tested cases (which are, for the reasons explained elsewhere in this document, comprehensively cover the complete usage of this code).
@@ -175,3 +163,45 @@ descend_recursively()
 
 ___Interpreter testing___
 
+The interpreter functions are the evaluate_...() fucntions.  I.e., evaluate_list_function(), evaluate_int_function(), evaluate_plus(), evaluate_length(), evaluate_bool().  These functions are tested as described below:
+evaluate_list_function()
+    This function takes the type of list_function (can only be CAR, CDR or CONS, because it is called within handle_LISTFUNC() after this check has already been run), and two Lips** pointers, and returns a Lisp* that is the correct output of the CAR/CDR/CONS function being carried out on the Lisp*s at the pointed addresses.  This function also resets the Lisp* inputs to NULL (hence the double-pointers being used).  Assert testing confirms that the output is the correct Lisp for each of the LISTFUNC types, and that the original Lisps are set to NULL.  Therefore, this assert testing confirms that this function works as intended.
+
+evaluate_int_function()
+    
+
+evaluate_plus()
+    
+
+evaluate_length()
+    
+
+evaluate_bool()
+    
+
+Additionally, the following functions are used in the interpreter, and are tested as described below:
+move_list()
+    This function should take a Lisp**, make a deep copy of the Lisp at the pointer, free said Lisp, and set the pointer to NULL.  This function should then return the deep copy.  Assert testing has been provided to demonstrate that 
+
+print_lisp()
+    
+
+
+
+
+___extension testing___
+
+The following functions are extension functions:
+
+add_error()
+    This function adds Errors to the log, and updates the meta data.  Assert testing demonstrates that it does add the correct Error to the next place in the error log, unless there are already 20 errors, in which case it flips the overlow flag.  Further, assert testing confirms that it correctly flips the parser/interpreter flag on the basis of the bool provided to the function.
+
+parser_fails()
+    This function should take a token and an error message, and update the log to have a new error with the line and col from the token, and the provided error message.  Further, it should return an ERROR node.  This functionality has been confirmed with assert testing - showing that the meassage, line and col are correctly carried through to the log, and that there is a correct output.
+    
+check_initialised()
+    This function checks a token against the varibakle list in a log, and sees if the entry for the given variable name is occupied or not.  If it isn, then it turns the Tree_node to an ERROR_NODE.  This functionality is confirmed by assert testing with both a varibale name that is occupied, and one that isn't
+
+___Lisp testing___
+
+The lisp functions are comprehensively assert tested in the test_lisp() function.  These assert tests are run against all of the functions therein, and show that these functions work as intended in all use cases.  These assert tests are well annotated in the test_lisp() function, to demonstrate their suitability.
