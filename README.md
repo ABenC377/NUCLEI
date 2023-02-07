@@ -1,7 +1,7 @@
 # NUCLEI-interpreter
 
 ## Project parameters
-An interpreter and parser for a programming language called 'NUCLEI'
+An interpreter and parser for a programming language called 'NUCLEI'.  This was the final project for the 'Programming in C' module that I took as a part of my MSc.
 
 ## Summary of approach
 
