@@ -502,7 +502,8 @@ Tree_node* handle_NIL(Token_node** current, Prog_log* log)  {
 
 Tree_node* handle_PRINT(Token_node** current, Prog_log* log) {
     if (!next_token_is(current, 1, t_print)) {
-        return parser_fails(log, (*current)->value, "Expecting 'PRINT' in print statement\n");
+        return parser_fails(log, (*current)->value, 
+        "Expecting 'PRINT' in print statement\n");
     } 
     Tree_node* print = make_node(PRINT);
     if ((*current)->value->type == t_string) {
@@ -533,7 +534,8 @@ void print_lisp(Lisp** lisp, Prog_log* log) {
 
 bool is_LIST(Token_node* current) {
     token_type type = current->value->type;
-    return (type == t_variable || type == t_literal || type == t_nil || type == t_l_parenthesis);
+    return (type == t_variable || type == t_literal || 
+    type == t_nil || type == t_l_parenthesis);
 }
 
 Tree_node* handle_STRING(Token_node** current, Prog_log* log) {
@@ -721,11 +723,12 @@ void add_error(Prog_log* log, Error* error, bool parsing) {
 }
 
 void test(void) {
+    #ifdef DEBUG
     lexical_analysis_test();
     parse_test();
-    interp_test();
     ext_test();
     test_lisp();
+    #endif
 }
 
 void parse_test(void) {
@@ -1902,10 +1905,6 @@ void parse_test(void) {
     free_log(test_log);
 }
 
-void interp_test(void) {
-    
-}
-
 void ext_test(void) {
     // add_error()
     Prog_log* test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
@@ -1958,8 +1957,6 @@ void ext_test(void) {
     free_log(test_log);
     free(test_token);
     
-    /*
-
     Token_node* test_token_node = (Token_node*)allocate_space(1, sizeof(Token_node));
     test_token_node->value = (Token*)allocate_space(1, sizeof(Token));
     test_log = (Prog_log*)allocate_space(1, sizeof(Prog_log));
@@ -1981,4 +1978,5 @@ void ext_test(void) {
     free_token_node(test_token_node);
     free_node(test_node);
     free_log(test_log);
+    
 }

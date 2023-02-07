@@ -748,8 +748,8 @@ void test_lisp(void) {
     assert(lisp_get_val(lisp_car(test_lisp6)) == 1);
     assert(lisp_get_val(lisp_car(test_lisp6->cdr)) == 2);
     lisp_free(test_lisp6);
-    free(test_lisp3);
-    free(test_lisp4);
+    lisp_free(test_lisp3);
+    lisp_free(test_lisp4);
     
     test_lisp1 = lisp_atom(1);
     test_lisp2 = lisp_atom(2);
@@ -760,8 +760,8 @@ void test_lisp(void) {
     assert(lisp_get_val(lisp_car(test_lisp7)) == 3);
     assert(lisp_get_val(lisp_car(test_lisp7->cdr)) == 4);
     lisp_free(test_lisp7);
-    free(test_lisp1);
-    free(test_lisp2);
+    lisp_free(test_lisp1);
+    lisp_free(test_lisp2);
 
     // assert testing Lisp_reduce()
     test_lisp1 = lisp_from_string("(1 ((2 3) 45) 12 (12 (44 (35 43) 45) (13)))");
